@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SFA.DAS.TokenService.Domain
+﻿namespace SFA.DAS.TokenService.Domain
 {
     public class OAuthAccessToken
     {
