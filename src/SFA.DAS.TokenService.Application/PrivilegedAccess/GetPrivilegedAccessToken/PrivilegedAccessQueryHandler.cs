@@ -23,9 +23,6 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessT
 
         public async Task<OAuthAccessToken> Handle(PrivilegedAccessQuery message)
         {
-            // Get the secret
-            // Make totp from secret
-            // Get access token from token service
             var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
             var totp = _totpService.Generate(secret);
             var accessCode = await _tokenService.GetAccessToken(totp);

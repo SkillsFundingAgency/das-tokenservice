@@ -58,6 +58,10 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Simonbu11.Otp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\simonbu11.otp.1.2.0\lib\net45\Simonbu11.Otp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
@@ -74,6 +78,7 @@
     <Compile Include="Configuration\KeyVaultConfiguration.cs" />
     <Compile Include="Data\KeyVaultSecretRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\TotpService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SFA.DAS.TokenService.Domain\SFA.DAS.TokenService.Domain.csproj">
