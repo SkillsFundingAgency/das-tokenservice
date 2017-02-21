@@ -43,6 +43,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MediatR, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediatR.2.1.0\lib\net45\MediatR.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
       <Private>True</Private>
@@ -141,6 +145,14 @@
     <ProjectReference Include="..\SFA.DAS.TokenService.Api.Types\SFA.DAS.TokenService.Api.Types.csproj">
       <Project>{4FFDABE9-5DEA-4D90-94B9-4762125124B8}</Project>
       <Name>SFA.DAS.TokenService.Api.Types</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SFA.DAS.TokenService.Application\SFA.DAS.TokenService.Application.csproj">
+      <Project>{3F306477-1478-4E3E-B525-DF5E6514B394}</Project>
+      <Name>SFA.DAS.TokenService.Application</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SFA.DAS.TokenService.Domain\SFA.DAS.TokenService.Domain.csproj">
+      <Project>{ec063189-e7ec-4eba-bef2-5747da1ecd6f}</Project>
+      <Name>SFA.DAS.TokenService.Domain</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
