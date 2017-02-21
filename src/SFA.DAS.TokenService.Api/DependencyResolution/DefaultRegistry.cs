@@ -15,6 +15,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 using MediatR;
+using Microsoft.Azure;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
 using StructureMap.Configuration.DSL;
 using StructureMap.Graph;
@@ -46,8 +47,17 @@ namespace SFA.DAS.TokenService.Api.DependencyResolution
         }
         private void RegisterConfiguration()
         {
-            For<KeyVaultConfiguration>().Use(() => new KeyVaultConfiguration());
-            For<OAuthTokenServiceConfiguration>().Use(() => new OAuthTokenServiceConfiguration());
+            For<KeyVaultConfiguration>().Use(() => new KeyVaultConfiguration
+            {
+                VaultUri = CloudConfigurationManager.GetSetting("KeyVaultUri"),
+                ClientId = CloudConfigurationManager.GetSetting("KeyVaultClientId"),
+                ClientSecret = CloudConfigurationManager.GetSetting("KeyVaultClientSecret")
+            });
+            For<OAuthTokenServiceConfiguration>().Use(() => new OAuthTokenServiceConfiguration
+            {
+                Url = CloudConfigurationManager.GetSetting("HmrcTokenUri"),
+                ClientId = CloudConfigurationManager.GetSetting("HmrcTokenClientId")
+            });
         }
     }
 }

@@ -10,6 +10,11 @@
     </Sites>
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
+      <Setting name="KeyVaultUri" />
+      <Setting name="KeyVaultClientId" />
+      <Setting name="KeyVaultClientSecret" />
+      <Setting name="HmrcTokenUri" />
+      <Setting name="HmrcTokenClientId" />
     </ConfigurationSettings>
     <Endpoints>
       <InputEndpoint name="Endpoint1" protocol="http" port="80" />

@@ -4,6 +4,11 @@
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="KeyVaultUri" value="__KeyVaultUri__" />
+      <Setting name="KeyVaultClientId" value="__KeyVaultClientId__" />
+      <Setting name="KeyVaultClientSecret" value="__KeyVaultClientSecret__" />
+      <Setting name="HmrcTokenUri" value="__HmrcTokenUri__" />
+      <Setting name="HmrcTokenClientId" value="__HmrcTokenClientId__" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>
