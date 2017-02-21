@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.TokenService.Applic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.TokenService.Api.UnitTests", "SFA.DAS.TokenService.Api.UnitTests\SFA.DAS.TokenService.Api.UnitTests.csproj", "{875EDF14-EEF2-46BE-B395-851574F7835E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.TokenService.Infrastructure.UnitTests", "SFA.DAS.TokenService.Infrastructure.UnitTests\SFA.DAS.TokenService.Infrastructure.UnitTests.csproj", "{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +69,10 @@ Global
 		{875EDF14-EEF2-46BE-B395-851574F7835E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{875EDF14-EEF2-46BE-B395-851574F7835E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{875EDF14-EEF2-46BE-B395-851574F7835E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,5 +80,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{AB2EDE59-F0B7-4152-A48F-AA3E4F13CDDC} = {AB5B9606-32E0-4B9F-9162-661F166FAD0A}
 		{875EDF14-EEF2-46BE-B395-851574F7835E} = {AB5B9606-32E0-4B9F-9162-661F166FAD0A}
+		{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99} = {AB5B9606-32E0-4B9F-9162-661F166FAD0A}
 	EndGlobalSection
 EndGlobal

@@ -76,8 +76,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\KeyVaultConfiguration.cs" />
+    <Compile Include="Configuration\OAuthTokenServiceConfiguration.cs" />
     <Compile Include="Data\KeyVaultSecretRepository.cs" />
+    <Compile Include="Http\HttpClientWrapper.cs" />
+    <Compile Include="Http\IHttpClientWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\OAuthTokenRequest.cs" />
+    <Compile Include="Services\OAuthTokenResponse.cs" />
+    <Compile Include="Services\OAuthTokenService.cs" />
     <Compile Include="Services\TotpService.cs" />
   </ItemGroup>
   <ItemGroup>
