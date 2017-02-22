@@ -31,6 +31,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.TokenService.Api.Un
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.TokenService.Infrastructure.UnitTests", "SFA.DAS.TokenService.Infrastructure.UnitTests\SFA.DAS.TokenService.Infrastructure.UnitTests.csproj", "{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.TokenService.Api.Client", "SFA.DAS.TokenService.Api.Client\SFA.DAS.TokenService.Api.Client.csproj", "{ACE8496D-354B-4EB5-9500-9F7B8BE41C98}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.TokenService.Api.Client.UnitTests", "SFA.DAS.TokenService.Api.Client.UnitTests\SFA.DAS.TokenService.Api.Client.UnitTests.csproj", "{F18FA4C4-3E7A-48BB-A232-CF3738BF7A62}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +77,14 @@ Global
 		{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACE8496D-354B-4EB5-9500-9F7B8BE41C98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACE8496D-354B-4EB5-9500-9F7B8BE41C98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACE8496D-354B-4EB5-9500-9F7B8BE41C98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACE8496D-354B-4EB5-9500-9F7B8BE41C98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F18FA4C4-3E7A-48BB-A232-CF3738BF7A62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F18FA4C4-3E7A-48BB-A232-CF3738BF7A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F18FA4C4-3E7A-48BB-A232-CF3738BF7A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F18FA4C4-3E7A-48BB-A232-CF3738BF7A62}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -81,5 +93,6 @@ Global
 		{AB2EDE59-F0B7-4152-A48F-AA3E4F13CDDC} = {AB5B9606-32E0-4B9F-9162-661F166FAD0A}
 		{875EDF14-EEF2-46BE-B395-851574F7835E} = {AB5B9606-32E0-4B9F-9162-661F166FAD0A}
 		{CCF7E26D-EAE9-4A63-8303-4CD02CA8BC99} = {AB5B9606-32E0-4B9F-9162-661F166FAD0A}
+		{F18FA4C4-3E7A-48BB-A232-CF3738BF7A62} = {AB5B9606-32E0-4B9F-9162-661F166FAD0A}
 	EndGlobalSection
 EndGlobal
