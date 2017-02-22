@@ -58,6 +58,7 @@
     <Compile Include="SecureHttpClient.cs" />
     <Compile Include="TokenServiceApiClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TokenServiceApiClientConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
