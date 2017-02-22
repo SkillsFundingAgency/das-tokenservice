@@ -16,12 +16,12 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
         private const string TotpCode = "TOTP-CODE";
         private const string AccessToken = "ACCESS-TOKEN";
         private const string RefreshToken = "REFRESH-TOKEN";
-        private readonly DateTime ExpiresAt = new DateTime(2017, 2, 22, 13, 45, 26);
+        private readonly DateTime ExpiresAt = DateTime.Now.AddHours(2);
         private const string Scope = "SCOPE";
         private const string TokenType = "TOKEN-TYPE";
         private const string CachedAccessToken = "CACHED-ACCESS-TOKEN";
         private const string CachedRefreshToken = "CACHED-REFRESH-TOKEN";
-        private readonly DateTime CachedExpiresAt = new DateTime(2017, 2, 22, 12, 35, 16);
+        private readonly DateTime CachedExpiresAt = DateTime.Now.AddHours(1);
         private const string CachedScope = "CACHED-SCOPE";
         private const string CachedTokenType = "CACHED-TOKEN-TYPE";
         private const string CacheKey = "OGD-TOKEN";
