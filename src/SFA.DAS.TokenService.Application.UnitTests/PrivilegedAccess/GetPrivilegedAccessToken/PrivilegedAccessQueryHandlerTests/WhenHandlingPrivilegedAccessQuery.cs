@@ -26,6 +26,11 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
         private const string CachedScope = "CACHED-SCOPE";
         private const string CachedTokenType = "CACHED-TOKEN-TYPE";
         private const string CacheKey = "OGD-TOKEN";
+        private const string RefreshedAccessToken = "REFRESHED-ACCESS-TOKEN";
+        private const string RefreshedRefreshToken = "REFRESHED-REFRESH-TOKEN";
+        private readonly DateTime RefreshedExpiresAt = DateTime.Now.AddHours(3);
+        private const string RefreshedScope = "REFRESHED-SCOPE";
+        private const string RefreshedTokenType = "REFRESHED-TOKEN-TYPE";
 
         private Mock<ISecretRepository> _secretRepository;
         private Mock<ITotpService> _totpService;
@@ -48,13 +53,22 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
 
             _oauthTokenService = new Mock<IOAuthTokenService>();
             _oauthTokenService.Setup(s => s.GetAccessToken(TotpCode))
-                .ReturnsAsync(new Domain.OAuthAccessToken
+                .ReturnsAsync(new OAuthAccessToken
                 {
                     AccessToken = AccessToken,
                     RefreshToken = RefreshToken,
                     ExpiresAt = ExpiresAt,
                     Scope = Scope,
                     TokenType = TokenType
+                });
+            _oauthTokenService.Setup(s => s.GetAccessTokenFromRefreshToken(TotpCode, CachedRefreshToken))
+                .ReturnsAsync(new OAuthAccessToken
+                {
+                    AccessToken = RefreshedAccessToken,
+                    RefreshToken = RefreshedRefreshToken,
+                    ExpiresAt = RefreshedExpiresAt,
+                    Scope = RefreshedScope,
+                    TokenType = RefreshedTokenType
                 });
 
             _cacheProvider = new Mock<ICacheProvider>();
@@ -148,7 +162,7 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
         }
 
         [Test]
-        public async Task ThenItShouldReturnAccessCodeDetailsFromOAuthServiceIfCacheAvailableButExpired()
+        public async Task ThenItShouldAttemptToUseRefreshCodeToGetNewAccessCodeIfCodeExpired()
         {
             // Arrange
             _cacheProvider.Setup(p => p.GetAsync(CacheKey))
@@ -156,7 +170,7 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
                 {
                     AccessToken = CachedAccessToken,
                     RefreshToken = CachedRefreshToken,
-                    ExpiresAt = DateTime.Now.AddMinutes(-1),
+                    ExpiresAt = DateTime.UtcNow.AddHours(-1),
                     Scope = CachedScope,
                     TokenType = CachedTokenType
                 });
@@ -166,11 +180,11 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
 
             // Assert
             Assert.IsNotNull(actual);
-            Assert.AreEqual(AccessToken, actual.AccessToken);
-            Assert.AreEqual(RefreshToken, actual.RefreshToken);
-            Assert.AreEqual(ExpiresAt, actual.ExpiresAt);
-            Assert.AreEqual(Scope, actual.Scope);
-            Assert.AreEqual(TokenType, actual.TokenType);
+            Assert.AreEqual(RefreshedAccessToken, actual.AccessToken);
+            Assert.AreEqual(RefreshedRefreshToken, actual.RefreshToken);
+            Assert.AreEqual(RefreshedExpiresAt, actual.ExpiresAt);
+            Assert.AreEqual(RefreshedScope, actual.Scope);
+            Assert.AreEqual(RefreshedTokenType, actual.TokenType);
         }
 
     }

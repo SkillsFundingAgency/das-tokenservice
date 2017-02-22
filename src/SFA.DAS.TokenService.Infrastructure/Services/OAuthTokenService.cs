@@ -39,5 +39,26 @@ namespace SFA.DAS.TokenService.Infrastructure.Services
                 TokenType = hmrcToken.TokenType
             };
         }
+
+        public async Task<OAuthAccessToken> GetAccessTokenFromRefreshToken(string clientSecret, string refreshToken)
+        {
+            var request = new OAuthTokenRefreshRequest
+            {
+                ClientId = _configuration.ClientId,
+                ClientSecret = clientSecret,
+                GrantType = "client_credentials",
+                Scopes = "read:apprenticeship-levy",
+                RefreshToken = refreshToken
+            };
+            var hmrcToken = await _httpClient.Post<OAuthTokenResponse>(_configuration.Url, request);
+            return new OAuthAccessToken
+            {
+                AccessToken = hmrcToken.AccessToken,
+                RefreshToken = hmrcToken.RefreshToken,
+                ExpiresAt = DateTime.UtcNow.AddSeconds(hmrcToken.ExpiresIn),
+                Scope = hmrcToken.Scope,
+                TokenType = hmrcToken.TokenType
+            };
+        }
     }
 }

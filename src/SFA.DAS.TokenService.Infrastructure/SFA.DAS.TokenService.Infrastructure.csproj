@@ -101,6 +101,7 @@
     <Compile Include="Logging\LoggingConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\InMemoryCacheProvider.cs" />
+    <Compile Include="Services\OAuthTokenRefreshRequest.cs" />
     <Compile Include="Services\OAuthTokenRequest.cs" />
     <Compile Include="Services\OAuthTokenResponse.cs" />
     <Compile Include="Services\OAuthTokenService.cs" />

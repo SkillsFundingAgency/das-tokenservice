@@ -34,6 +34,16 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessT
 
         public async Task<OAuthAccessToken> Handle(PrivilegedAccessQuery message)
         {
+            var accessToken = await GetToken();
+            if (accessToken.ExpiresAt <= DateTime.UtcNow)
+            {
+                accessToken = await RefreshToken(accessToken.RefreshToken);
+            }
+            return accessToken;
+        }
+
+        private async Task<OAuthAccessToken> GetToken()
+        {
             var accessToken = await GetTokenFromCache();
             if (accessToken == null)
             {
@@ -42,16 +52,21 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessT
             }
             return accessToken;
         }
+        private async Task<OAuthAccessToken> RefreshToken(string refreshToken)
+        {
+            var accessToken = await GetTokenFromServiceUsingRefreshToken(refreshToken);
+            if (accessToken == null)
+            {
+                accessToken = await GetTokenFromService();
+            }
+            await _cacheProvider.SetAsync(CacheKey, accessToken, accessToken.ExpiresAt);
+            return accessToken;
+        }
 
         private async Task<OAuthAccessToken> GetTokenFromCache()
         {
             _logger.Debug("Attempting to get privileged access token from cache");
             var token = (OAuthAccessToken)await _cacheProvider.GetAsync(CacheKey);
-            if (token == null || token.ExpiresAt < DateTime.UtcNow)
-            {
-                return null;
-            }
-            _logger.Debug("Gott privileged access token from cache");
             return token;
         }
         private async Task<OAuthAccessToken> GetTokenFromService()
@@ -63,6 +78,24 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessT
 
             _logger.Debug("Got privileged access token from service");
             return token;
+        }
+        private async Task<OAuthAccessToken> GetTokenFromServiceUsingRefreshToken(string refreshToken)
+        {
+            try
+            {
+                _logger.Debug("Attempting to get privileged access token from service using refresh token");
+                var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
+                var totp = _totpService.Generate(secret);
+                var token = await _tokenService.GetAccessTokenFromRefreshToken(totp, refreshToken);
+
+                _logger.Debug("Got privileged access token from service using refresh token");
+                return token;
+            }
+            catch (Exception ex)
+            {
+                _logger.Warn(ex, $"Error trying to refresh access token - {ex.Message}");
+                return null;
+            }
         }
     }
 }
