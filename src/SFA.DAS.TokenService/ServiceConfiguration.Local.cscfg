@@ -9,6 +9,8 @@
       <Setting name="KeyVaultClientSecret" value="" />
       <Setting name="HmrcTokenUri" value="" />
       <Setting name="HmrcTokenClientId" value="" />
+      <Setting name="idaAudience" value="https://citizenazuresfabisgov.onmicrosoft.com/tokenservice-api" />
+      <Setting name="idaTenant" value="citizenazuresfabisgov.onmicrosoft.com" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>
