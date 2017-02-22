@@ -17,7 +17,7 @@
 using MediatR;
 using Microsoft.Azure;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
-using StructureMap.Configuration.DSL;
+using StructureMap;
 using StructureMap.Graph;
 
 namespace SFA.DAS.TokenService.Api.DependencyResolution

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Web.Http.Results;
 using MediatR;
 using Moq;
+using NLog;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Api.Controllers;
 using SFA.DAS.TokenService.Api.Types;
@@ -17,6 +18,7 @@ namespace SFA.DAS.TokenService.Api.UnitTests.Controllers.PrivilegedAccessControl
 
         private Mock<IMediator> _mediator;
         private PrivilegedAccessController _controller;
+        private Mock<ILogger> _logger;
 
         [SetUp]
         public void Arrange()
@@ -29,7 +31,9 @@ namespace SFA.DAS.TokenService.Api.UnitTests.Controllers.PrivilegedAccessControl
                     ExpiresAt = ExpiresAt
                 });
 
-            _controller = new PrivilegedAccessController(_mediator.Object);
+            _logger = new Mock<ILogger>();
+
+            _controller = new PrivilegedAccessController(_mediator.Object, _logger.Object);
         }
 
         [Test]
@@ -61,6 +65,21 @@ namespace SFA.DAS.TokenService.Api.UnitTests.Controllers.PrivilegedAccessControl
 
             // Assert
             Assert.AreEqual(ExpiresAt, actual.Content.ExpiryTime);
+        }
+
+        [Test]
+        public async Task ThenItShouldReturnInternalServerErrorWhenExceptionOccurs()
+        {
+            // Arrange
+            _mediator.Setup(m => m.SendAsync(It.IsAny<PrivilegedAccessQuery>()))
+                .ThrowsAsync(new Exception("Unit test"));
+
+            // Act
+            var actual = await _controller.GetPrivilegedAccessToken();
+
+            // Assert
+            Assert.IsNotNull(actual);
+            Assert.IsInstanceOf<InternalServerErrorResult>(actual);
         }
 
     }

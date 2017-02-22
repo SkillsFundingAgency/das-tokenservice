@@ -17,6 +17,10 @@
       <Setting name="HmrcTokenClientId" />
       <Setting name="idaAudience" />
       <Setting name="idaTenant" />
+      <Setting name="LoggingRedisConnectionString" />
+      <Setting name="LoggingRedisKey" />
+      <Setting name="LogLevel" />
+      <Setting name="EnvironmentName" />
     </ConfigurationSettings>
     <Endpoints>
       <InputEndpoint name="Endpoint1" protocol="https" port="443" certificate="WebSslCert"/>

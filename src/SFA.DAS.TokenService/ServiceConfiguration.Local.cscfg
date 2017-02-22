@@ -11,9 +11,13 @@
       <Setting name="HmrcTokenClientId" value="" />
       <Setting name="idaAudience" value="https://citizenazuresfabisgov.onmicrosoft.com/tokenservice-api" />
       <Setting name="idaTenant" value="citizenazuresfabisgov.onmicrosoft.com" />
+      <Setting name="LoggingRedisConnectionString" value="" />
+      <Setting name="LoggingRedisKey" value="" />
+      <Setting name="LogLevel" value="Debug" />
+      <Setting name="EnvironmentName" value="LOCAL" />
     </ConfigurationSettings>
     <Certificates>
-      <Certificate name="WebSslCert" thumbprint="87A28DF77BBA73983918DF4288A132588AE820F4" thumbprintAlgorithm="sha1" />
+      <Certificate name="WebSslCert" thumbprint="FE14C6E906B1E94E93C6AF8FA113EA1221D5DE9C" thumbprintAlgorithm="sha1" />
     </Certificates>
   </Role>
 </ServiceConfiguration>

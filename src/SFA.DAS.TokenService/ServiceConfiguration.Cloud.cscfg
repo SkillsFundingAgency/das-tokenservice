@@ -11,6 +11,10 @@
       <Setting name="HmrcTokenClientId" value="__HmrcTokenClientId__" />
       <Setting name="idaAudience" value="__idaAudience__" />
       <Setting name="idaTenant" value="__idaTenant__" />
+      <Setting name="LoggingRedisConnectionString" value="__LoggingRedisConnectionString__" />
+      <Setting name="LoggingRedisKey" value="__LoggingRedisKey__" />
+      <Setting name="LogLevel" value="__LogLevel__" />
+      <Setting name="EnvironmentName" value="__EnvironmentName__" />
     </ConfigurationSettings>
     <Certificates>
       <Certificate name="WebSslCert" thumbprint="87A28DF77BBA73983918DF4288A132588AE820F4" thumbprintAlgorithm="sha1" />
