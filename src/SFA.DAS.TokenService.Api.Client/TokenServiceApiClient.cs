@@ -5,7 +5,7 @@ using SFA.DAS.TokenService.Api.Types;
 
 namespace SFA.DAS.TokenService.Api.Client
 {
-    public class TokenServiceApiClient
+    public class TokenServiceApiClient : ITokenServiceApiClient
     {
         private readonly ITokenServiceApiClientConfiguration _configuration;
         private readonly ISecureHttpClient _httpClient;

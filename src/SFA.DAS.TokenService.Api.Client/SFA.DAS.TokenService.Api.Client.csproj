@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ISecureHttpClient.cs" />
+    <Compile Include="ITokenServiceApiClient.cs" />
     <Compile Include="ITokenServiceApiClientConfiguration.cs" />
     <Compile Include="SecureHttpClient.cs" />
     <Compile Include="TokenServiceApiClient.cs" />
