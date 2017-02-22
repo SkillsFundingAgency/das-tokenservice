@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Moq;
+using NLog;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken;
 using SFA.DAS.TokenService.Domain;
@@ -32,6 +33,7 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
         private Mock<ICacheProvider> _cacheProvider;
         private PrivilegedAccessQueryHandler _handler;
         private PrivilegedAccessQuery _query;
+        private Mock<ILogger> _logger;
 
         [SetUp]
         public void Arrange()
@@ -57,8 +59,9 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
 
             _cacheProvider = new Mock<ICacheProvider>();
 
+            _logger = new Mock<ILogger>();
 
-            _handler = new PrivilegedAccessQueryHandler(_secretRepository.Object, _totpService.Object, _oauthTokenService.Object, _cacheProvider.Object);
+            _handler = new PrivilegedAccessQueryHandler(_secretRepository.Object, _totpService.Object, _oauthTokenService.Object, _cacheProvider.Object, _logger.Object);
 
             _query = new PrivilegedAccessQuery();
         }
