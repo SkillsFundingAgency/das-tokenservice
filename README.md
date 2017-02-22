@@ -34,12 +34,12 @@ var client = new TokenServiceApiClient(configuration);
 ## Privileged Access
 
 The privileged access endpoint provides the access code for HMRC apis. You can request using the http request:
-```
+```http
 GET https://some.server/api/PrivilegedAccess
 ```
 
 Which will return something like:
-```
+```json
 {
   "AccessCode": "a172ed1ee4adbaa339895655ab875a6",
   "ExpiryTime": "2017-02-22T18:01:33.907979Z"
