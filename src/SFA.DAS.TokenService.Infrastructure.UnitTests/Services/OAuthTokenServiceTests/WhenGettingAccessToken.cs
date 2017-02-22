@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Moq;
@@ -60,9 +61,22 @@ namespace SFA.DAS.TokenService.Infrastructure.UnitTests.Services.OAuthTokenServi
             Assert.IsNotNull(actual);
             Assert.AreEqual(AccessToken, actual.AccessToken);
             Assert.AreEqual(RefreshToken, actual.RefreshToken);
-            Assert.AreEqual(ExpiresIn, actual.ExpiresIn);
             Assert.AreEqual(Scopes, actual.Scope);
             Assert.AreEqual(TokenType, actual.TokenType);
+        }
+
+        [Test]
+        public async Task ThenItShouldReturnExpiresAtAsUtfNowPlusExpiresInSeconds()
+        {
+            // Act
+            var actual = await _service.GetAccessToken(ClientSecret);
+
+            // Assert
+            var expectedExpiry = DateTime.UtcNow.AddSeconds(ExpiresIn);
+            Assert.IsTrue(actual.ExpiresAt >= expectedExpiry.AddSeconds(-1),
+                $"Expected Expiry time to be greater than or equal to {expectedExpiry.AddSeconds(-1)}, but was {actual.ExpiresAt}");
+            Assert.IsTrue(actual.ExpiresAt <= expectedExpiry.AddSeconds(1),
+                $"Expected Expiry time to be less than or equal to {expectedExpiry.AddSeconds(1)}, but was {actual.ExpiresAt}");
         }
 
         [Test]

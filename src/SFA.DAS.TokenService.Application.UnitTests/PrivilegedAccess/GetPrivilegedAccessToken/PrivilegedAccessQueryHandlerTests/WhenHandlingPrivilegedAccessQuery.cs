@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken;
+using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Domain.Data;
 using SFA.DAS.TokenService.Domain.Services;
 
@@ -14,13 +16,20 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
         private const string TotpCode = "TOTP-CODE";
         private const string AccessToken = "ACCESS-TOKEN";
         private const string RefreshToken = "REFRESH-TOKEN";
-        private const int ExpiresIn = 123;
+        private readonly DateTime ExpiresAt = new DateTime(2017, 2, 22, 13, 45, 26);
         private const string Scope = "SCOPE";
         private const string TokenType = "TOKEN-TYPE";
+        private const string CachedAccessToken = "CACHED-ACCESS-TOKEN";
+        private const string CachedRefreshToken = "CACHED-REFRESH-TOKEN";
+        private readonly DateTime CachedExpiresAt = new DateTime(2017, 2, 22, 12, 35, 16);
+        private const string CachedScope = "CACHED-SCOPE";
+        private const string CachedTokenType = "CACHED-TOKEN-TYPE";
+        private const string CacheKey = "OGD-TOKEN";
 
         private Mock<ISecretRepository> _secretRepository;
         private Mock<ITotpService> _totpService;
         private Mock<IOAuthTokenService> _oauthTokenService;
+        private Mock<ICacheProvider> _cacheProvider;
         private PrivilegedAccessQueryHandler _handler;
         private PrivilegedAccessQuery _query;
 
@@ -41,12 +50,15 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
                 {
                     AccessToken = AccessToken,
                     RefreshToken = RefreshToken,
-                    ExpiresIn = ExpiresIn,
+                    ExpiresAt = ExpiresAt,
                     Scope = Scope,
                     TokenType = TokenType
                 });
 
-            _handler = new PrivilegedAccessQueryHandler(_secretRepository.Object, _totpService.Object, _oauthTokenService.Object);
+            _cacheProvider = new Mock<ICacheProvider>();
+
+
+            _handler = new PrivilegedAccessQueryHandler(_secretRepository.Object, _totpService.Object, _oauthTokenService.Object, _cacheProvider.Object);
 
             _query = new PrivilegedAccessQuery();
         }
@@ -91,9 +103,72 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
             Assert.IsNotNull(actual);
             Assert.AreEqual(AccessToken, actual.AccessToken);
             Assert.AreEqual(RefreshToken, actual.RefreshToken);
-            Assert.AreEqual(ExpiresIn, actual.ExpiresIn);
+            Assert.AreEqual(ExpiresAt, actual.ExpiresAt);
             Assert.AreEqual(Scope, actual.Scope);
             Assert.AreEqual(TokenType, actual.TokenType);
         }
+
+        [Test]
+        public async Task ThenItShouldStoreAccessCodeInCache()
+        {
+            // Act
+            var actual = await _handler.Handle(_query);
+
+            // Assert
+            _cacheProvider.Verify(p => p.SetAsync(CacheKey, It.Is<OAuthAccessToken>(t => t.AccessToken == AccessToken), ExpiresAt), Times.Once);
+        }
+
+        [Test]
+        public async Task ThenItShouldReturnAccessCodeDetailsFromCacheIfAvailable()
+        {
+            // Arrange
+            _cacheProvider.Setup(p => p.GetAsync(CacheKey))
+                .ReturnsAsync(new OAuthAccessToken
+                {
+                    AccessToken = CachedAccessToken,
+                    RefreshToken = CachedRefreshToken,
+                    ExpiresAt = CachedExpiresAt,
+                    Scope = CachedScope,
+                    TokenType = CachedTokenType
+                });
+
+            // Act
+            var actual = await _handler.Handle(_query);
+
+            // Assert
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(CachedAccessToken, actual.AccessToken);
+            Assert.AreEqual(CachedRefreshToken, actual.RefreshToken);
+            Assert.AreEqual(CachedExpiresAt, actual.ExpiresAt);
+            Assert.AreEqual(CachedScope, actual.Scope);
+            Assert.AreEqual(CachedTokenType, actual.TokenType);
+        }
+
+        [Test]
+        public async Task ThenItShouldReturnAccessCodeDetailsFromOAuthServiceIfCacheAvailableButExpired()
+        {
+            // Arrange
+            _cacheProvider.Setup(p => p.GetAsync(CacheKey))
+                .ReturnsAsync(new OAuthAccessToken
+                {
+                    AccessToken = CachedAccessToken,
+                    RefreshToken = CachedRefreshToken,
+                    ExpiresAt = DateTime.Now.AddMinutes(-1),
+                    Scope = CachedScope,
+                    TokenType = CachedTokenType
+                });
+
+            // Act
+            var actual = await _handler.Handle(_query);
+
+            // Assert
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(AccessToken, actual.AccessToken);
+            Assert.AreEqual(RefreshToken, actual.RefreshToken);
+            Assert.AreEqual(ExpiresAt, actual.ExpiresAt);
+            Assert.AreEqual(Scope, actual.Scope);
+            Assert.AreEqual(TokenType, actual.TokenType);
+        }
+
     }
 }

@@ -13,7 +13,8 @@ namespace SFA.DAS.TokenService.Api.UnitTests.Controllers.PrivilegedAccessControl
     public class WhenGettingPrivilegedAccessToken
     {
         private const string AccessCode = "ACCESS-TOKEN";
-        private const int ExpiresIn = 123;
+        private readonly DateTime ExpiresAt = new DateTime(2017, 2, 22, 13, 45, 26);
+
         private Mock<IMediator> _mediator;
         private PrivilegedAccessController _controller;
 
@@ -25,7 +26,7 @@ namespace SFA.DAS.TokenService.Api.UnitTests.Controllers.PrivilegedAccessControl
                 .ReturnsAsync(new Domain.OAuthAccessToken
                 {
                     AccessToken = AccessCode,
-                    ExpiresIn = ExpiresIn
+                    ExpiresAt = ExpiresAt
                 });
 
             _controller = new PrivilegedAccessController(_mediator.Object);
@@ -53,17 +54,13 @@ namespace SFA.DAS.TokenService.Api.UnitTests.Controllers.PrivilegedAccessControl
         }
 
         [Test]
-        public async Task ThenItShouldReturnExpiryTimeAsUtcNowPlusNumberOfSecondsInAccessToken()
+        public async Task ThenItShouldReturnExpiryTime()
         {
             // Act
             var actual = await _controller.GetPrivilegedAccessToken() as OkNegotiatedContentResult<PrivilegedAccessToken>;
 
             // Assert
-            var expectedExpiry = DateTime.UtcNow.AddSeconds(ExpiresIn);
-            Assert.IsTrue(actual.Content.ExpiryTime >= expectedExpiry.AddSeconds(-1), 
-                $"Expected Expiry time to be greater than or equal to {expectedExpiry.AddSeconds(-1)}, but was {actual.Content.ExpiryTime}");
-            Assert.IsTrue(actual.Content.ExpiryTime <= expectedExpiry.AddSeconds(1),
-                $"Expected Expiry time to be less than or equal to {expectedExpiry.AddSeconds(1)}, but was {actual.Content.ExpiryTime}");
+            Assert.AreEqual(ExpiresAt, actual.Content.ExpiryTime);
         }
 
     }

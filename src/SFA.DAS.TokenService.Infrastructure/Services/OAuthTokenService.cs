@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Domain.Services;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
@@ -33,7 +34,7 @@ namespace SFA.DAS.TokenService.Infrastructure.Services
             {
                 AccessToken = hmrcToken.AccessToken,
                 RefreshToken = hmrcToken.RefreshToken,
-                ExpiresIn = hmrcToken.ExpiresIn,
+                ExpiresAt = DateTime.UtcNow.AddSeconds(hmrcToken.ExpiresIn),
                 Scope = hmrcToken.Scope,
                 TokenType = hmrcToken.TokenType
             };

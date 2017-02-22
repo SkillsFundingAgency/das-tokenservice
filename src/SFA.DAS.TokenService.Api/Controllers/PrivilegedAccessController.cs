@@ -28,7 +28,7 @@ namespace SFA.DAS.TokenService.Api.Controllers
             return Ok(new PrivilegedAccessToken
             {
                 AccessCode = accessToken.AccessToken,
-                ExpiryTime = DateTime.UtcNow.AddSeconds(accessToken.ExpiresIn)
+                ExpiryTime = accessToken.ExpiresAt
             });
         }
     }
