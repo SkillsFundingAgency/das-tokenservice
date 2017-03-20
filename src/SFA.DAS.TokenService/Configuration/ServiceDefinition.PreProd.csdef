@@ -24,6 +24,7 @@
     </ConfigurationSettings>
     <Endpoints>
       <InputEndpoint name="Endpoint1" protocol="https" port="443" certificate="WebSslCert" loadBalancer="das-tok-ilb"/>
+      <InputEndpoint name="Endpoint1" protocol="http" port="80" loadBalancer="das-tok-ilb"/>
     </Endpoints>
     <Certificates>
       <Certificate name="WebSslCert" storeLocation="LocalMachine" storeName="My" />
