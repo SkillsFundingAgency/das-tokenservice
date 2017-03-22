@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+
 namespace SFA.DAS.TokenService.Api.Client
 {
     public class TokenServiceApiClientConfiguration : ITokenServiceApiClientConfiguration
@@ -7,5 +9,6 @@ namespace SFA.DAS.TokenService.Api.Client
         public string ClientSecret { get; set; }
         public string IdentifierUri { get; set; }
         public string Tenant { get; set; }
+        public X509Certificate TokenCertificate { get; set; }
     }
 }
