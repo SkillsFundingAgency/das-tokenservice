@@ -17,7 +17,7 @@
       <Setting name="EnvironmentName" value="__EnvironmentName__" />
     </ConfigurationSettings>
     <Certificates>
-      <Certificate name="WebSslCert" thumbprint="F5499129BC6D88F360E1F9357CE669A13216A0E8" thumbprintAlgorithm="sha1" />
+      <Certificate name="WebSslCert" thumbprint="F2071ABFB360B0956E95EDCB47BBBA731F50DBAA" thumbprintAlgorithm="sha1" />
     </Certificates>
   </Role>
   <NetworkConfiguration>
