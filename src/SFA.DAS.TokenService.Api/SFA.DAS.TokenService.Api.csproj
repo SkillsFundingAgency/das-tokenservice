@@ -229,6 +229,7 @@
     <Compile Include="App_Start\StructuremapMvc.cs" />
     <Compile Include="App_Start\StructuremapWebApi.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\HealthCheckController.cs" />
     <Compile Include="Controllers\PrivilegedAccessController.cs" />
     <Compile Include="DependencyResolution\DefaultRegistry.cs" />
     <Compile Include="DependencyResolution\IoC.cs" />
