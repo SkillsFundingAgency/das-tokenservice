@@ -35,6 +35,7 @@ namespace SFA.DAS.TokenService.Api.DependencyResolution
                 scan.RegisterConcreteTypesAgainstTheFirstInterface();
             });
 
+            RegisterExecutionPolicies();
             RegisterMediator();
             RegisterConfiguration();
         }
@@ -58,6 +59,13 @@ namespace SFA.DAS.TokenService.Api.DependencyResolution
                 Url = CloudConfigurationManager.GetSetting("HmrcTokenUri"),
                 ClientId = CloudConfigurationManager.GetSetting("HmrcTokenClientId")
             });
+        }
+
+        private void RegisterExecutionPolicies()
+        {
+            For<Infrastructure.ExecutionPolicies.ExecutionPolicy>()
+                .Use<Infrastructure.ExecutionPolicies.HmrcExecutionPolicy>()
+                .Named(Infrastructure.ExecutionPolicies.HmrcExecutionPolicy.Name);
         }
     }
 }

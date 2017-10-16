@@ -7,6 +7,7 @@ using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken
 using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Domain.Data;
 using SFA.DAS.TokenService.Domain.Services;
+using SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 
 namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivilegedAccessToken.PrivilegedAccessQueryHandlerTests
 {
@@ -39,6 +40,7 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
         private PrivilegedAccessQueryHandler _handler;
         private PrivilegedAccessQuery _query;
         private Mock<ILogger> _logger;
+        private Mock<ExecutionPolicy> _executionPolicy;
 
         [SetUp]
         public void Arrange()
@@ -71,13 +73,36 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
                     TokenType = RefreshedTokenType
                 });
 
+            _executionPolicy = new Mock<ExecutionPolicy>();
+           _executionPolicy.Setup(o => o.ExecuteAsync<OAuthAccessToken>(It.IsAny<Func<Task<OAuthAccessToken>>>()))
+                .ReturnsAsync(new OAuthAccessToken
+                {
+                    AccessToken = AccessToken,
+                    RefreshToken = RefreshToken,
+                    ExpiresAt = ExpiresAt,
+                    Scope = Scope,
+                    TokenType = TokenType
+                });
             _cacheProvider = new Mock<ICacheProvider>();
 
             _logger = new Mock<ILogger>();
 
-            _handler = new PrivilegedAccessQueryHandler(_secretRepository.Object, _totpService.Object, _oauthTokenService.Object, _cacheProvider.Object, _logger.Object);
+            _handler = new PrivilegedAccessQueryHandler(_secretRepository.Object, _totpService.Object, _oauthTokenService.Object, _cacheProvider.Object, _logger.Object, _executionPolicy.Object);
 
             _query = new PrivilegedAccessQuery();
+        }
+
+        private void SetExecutionPolicyToReturnRefreshToken()
+        {
+            _executionPolicy.Setup(o => o.ExecuteAsync<OAuthAccessToken>(It.IsAny<Func<Task<OAuthAccessToken>>>()))
+                .ReturnsAsync(new OAuthAccessToken
+                {
+                    AccessToken = RefreshedAccessToken,
+                    RefreshToken = RefreshedRefreshToken,
+                    ExpiresAt = RefreshedExpiresAt,
+                    Scope = RefreshedScope,
+                    TokenType = RefreshedTokenType
+                });
         }
 
         [Test]
@@ -107,7 +132,8 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
             await _handler.Handle(_query);
 
             // Assert
-            _oauthTokenService.Verify(s => s.GetAccessToken(TotpCode), Times.Once);
+            _executionPolicy.Verify(o => o.ExecuteAsync(It.IsAny<Func<Task<OAuthAccessToken>>>()), Times.Once);
+            //_oauthTokenService.Verify(s => s.GetAccessToken(TotpCode), Times.Once);
         }
 
         [Test]
@@ -174,7 +200,7 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
                     Scope = CachedScope,
                     TokenType = CachedTokenType
                 });
-
+            SetExecutionPolicyToReturnRefreshToken();
             // Act
             var actual = await _handler.Handle(_query);
 
