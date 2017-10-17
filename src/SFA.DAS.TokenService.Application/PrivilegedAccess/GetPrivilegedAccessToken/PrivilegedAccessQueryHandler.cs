@@ -5,6 +5,7 @@ using NLog;
 using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Domain.Data;
 using SFA.DAS.TokenService.Domain.Services;
+using SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 
 namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken
 {
@@ -18,18 +19,21 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessT
         private readonly IOAuthTokenService _tokenService;
         private readonly ICacheProvider _cacheProvider;
         private readonly ILogger _logger;
+        private readonly ExecutionPolicy _executionPolicy;
 
         public PrivilegedAccessQueryHandler(ISecretRepository secretRepository,
                                             ITotpService totpService,
                                             IOAuthTokenService tokenService,
                                             ICacheProvider cacheProvider,
-                                            ILogger logger)
+                                            ILogger logger,
+            [RequiredPolicy(HmrcExecutionPolicy.Name)] ExecutionPolicy executionPolicy)
         {
             _secretRepository = secretRepository;
             _totpService = totpService;
             _tokenService = tokenService;
             _cacheProvider = cacheProvider;
             _logger = logger;
+            _executionPolicy = executionPolicy;
         }
 
         public async Task<OAuthAccessToken> Handle(PrivilegedAccessQuery message)
@@ -74,7 +78,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessT
             _logger.Debug("Attempting to get privileged access token from service");
             var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
             var totp = _totpService.Generate(secret);
-            var token = await _tokenService.GetAccessToken(totp);
+            var token = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(totp));
 
             _logger.Debug("Got privileged access token from service");
             return token;
@@ -86,7 +90,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessT
                 _logger.Debug("Attempting to get privileged access token from service using refresh token");
                 var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
                 var totp = _totpService.Generate(secret);
-                var token = await _tokenService.GetAccessTokenFromRefreshToken(totp, refreshToken);
+                var token = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(totp, refreshToken));
 
                 _logger.Debug("Got privileged access token from service using refresh token");
                 return token;

@@ -57,6 +57,10 @@
       <Project>{ec063189-e7ec-4eba-bef2-5747da1ecd6f}</Project>
       <Name>SFA.DAS.TokenService.Domain</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SFA.DAS.TokenService.Infrastructure\SFA.DAS.TokenService.Infrastructure.csproj">
+      <Project>{CBFF8FE7-049A-4640-8FC2-C19F03A14A74}</Project>
+      <Name>SFA.DAS.TokenService.Infrastructure</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

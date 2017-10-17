@@ -7,6 +7,7 @@ using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken
 using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Domain.Data;
 using SFA.DAS.TokenService.Domain.Services;
+using SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 
 namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivilegedAccessToken.PrivilegedAccessQueryHandlerTests
 {
@@ -75,7 +76,7 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
 
             _logger = new Mock<ILogger>();
 
-            _handler = new PrivilegedAccessQueryHandler(_secretRepository.Object, _totpService.Object, _oauthTokenService.Object, _cacheProvider.Object, _logger.Object);
+            _handler = new PrivilegedAccessQueryHandler(_secretRepository.Object, _totpService.Object, _oauthTokenService.Object, _cacheProvider.Object, _logger.Object, new NoopExecutionPolicy());
 
             _query = new PrivilegedAccessQuery();
         }

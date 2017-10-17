@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NoopExecutionPolicy.cs" />
     <Compile Include="PrivilegedAccess\GetPrivilegedAccessToken\PrivilegedAccessQueryHandlerTests\WhenHandlingPrivilegedAccessQuery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -74,6 +75,10 @@
     <ProjectReference Include="..\SFA.DAS.TokenService.Domain\SFA.DAS.TokenService.Domain.csproj">
       <Project>{EC063189-E7EC-4EBA-BEF2-5747DA1ECD6F}</Project>
       <Name>SFA.DAS.TokenService.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SFA.DAS.TokenService.Infrastructure\SFA.DAS.TokenService.Infrastructure.csproj">
+      <Project>{CBFF8FE7-049A-4640-8FC2-C19F03A14A74}</Project>
+      <Name>SFA.DAS.TokenService.Infrastructure</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
