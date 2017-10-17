@@ -108,7 +108,7 @@
     <Compile Include="Configuration\KeyVaultConfiguration.cs" />
     <Compile Include="Configuration\OAuthTokenServiceConfiguration.cs" />
     <Compile Include="Data\KeyVaultSecretRepository.cs" />
-    <Compile Include="DependencyResolution\ExecutionPolicyPolicy.cs" />
+    <Compile Include="DependencyResolution\StructureMapExecutionPolicy.cs" />
     <Compile Include="DependencyResolution\LoggingPolicy.cs" />
     <Compile Include="ExecutionPolicies\ExecutionPolicy.cs" />
     <Compile Include="ExecutionPolicies\HmrcExecutionPolicy.cs" />

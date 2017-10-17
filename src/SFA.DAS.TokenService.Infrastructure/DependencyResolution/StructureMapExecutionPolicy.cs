@@ -10,7 +10,7 @@ using StructureMap.Pipeline;
 
 namespace SFA.DAS.TokenService.Infrastructure.DependencyResolution
 {
-    public class ExecutionPolicyPolicy : ConfiguredInstancePolicy
+    public class StructureMapExecutionPolicy : ConfiguredInstancePolicy
     {
         protected override void apply(Type pluginType, IConfiguredInstance instance)
         {
