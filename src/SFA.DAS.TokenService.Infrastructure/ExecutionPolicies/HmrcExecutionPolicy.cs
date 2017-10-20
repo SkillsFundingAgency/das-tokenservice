@@ -22,8 +22,6 @@ namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies
         private readonly Policy RequestTimeoutPolicy;
         private readonly Policy UnauthorizedPolicy;
 
-        public string RetryToken { get; set; }
-
         public HmrcExecutionPolicy(ILog logger)
         {
             _logger = logger;
