@@ -35,8 +35,9 @@ namespace SFA.DAS.TokenService.Api.DependencyResolution
                 scan.RegisterConcreteTypesAgainstTheFirstInterface();
             });
 
-            RegisterExecutionPolicies();
+            
             RegisterMediator();
+            RegisterExecutionPolicies();
             RegisterConfiguration();
         }
 
