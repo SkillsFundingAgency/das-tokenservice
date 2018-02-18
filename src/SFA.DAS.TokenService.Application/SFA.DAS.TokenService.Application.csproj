@@ -48,8 +48,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PrivilegedAccess\TokenRefresh\DateTimeExtensions.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\HmrcAuthTokenBroker.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\IHmrcAuthTokenBroker.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\ITokenRefreshAudit.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\ITokenRefresher.cs" />
     <Compile Include="PrivilegedAccess\GetPrivilegedAccessToken\PrivilegedAccessQuery.cs" />
     <Compile Include="PrivilegedAccess\GetPrivilegedAccessToken\PrivilegedAccessQueryHandler.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\TokenRefreshAudit.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\TokenRefreshAuditEntry.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\TokenRefresher.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\TokenRefresherParameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

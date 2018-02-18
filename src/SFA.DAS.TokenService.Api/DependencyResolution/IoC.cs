@@ -27,6 +27,7 @@ namespace SFA.DAS.TokenService.Api.DependencyResolution {
                 c.Policies.Add<LoggingPolicy>();
                 c.Policies.Add(new StructureMapExecutionPolicy());
                 c.AddRegistry<DefaultRegistry>();
+                c.AddRegistry<TokenRefreshRegistry>();
             });
         }
     }
