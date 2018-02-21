@@ -15,8 +15,8 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
     public interface ITokenRefreshAudit
     {
         TokenRefreshAuditEntry CreateAuditEntry(OAuthAccessToken token);
-        void StartRefresh(TokenRefreshAuditEntry auditEntry);
-        void EndRefresh(TokenRefreshAuditEntry auditEntry);
+        void RefreshStarted(TokenRefreshAuditEntry auditEntry);
+        void RefreshEnded(TokenRefreshAuditEntry auditEntry);
         IEnumerable<TokenRefreshAuditEntry> AuditItems { get; }
     }
 }

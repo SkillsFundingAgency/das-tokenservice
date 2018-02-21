@@ -43,7 +43,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
 
             if (!cancellationToken.IsCancellationRequested)
             {
-                _refreshAudit.StartRefresh(auditItem);
+                _refreshAudit.RefreshStarted(auditItem);
 
                 OAuthAccessToken newToken = await TryRefreshUntilCancelledOrSuccess(
                                                         auditItem, 
@@ -51,7 +51,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
                                                         cancellationToken, 
                                                         refreshToken);
 
-                _refreshAudit.EndRefresh(auditItem);
+                _refreshAudit.RefreshEnded(auditItem);
                 return newToken;
             }
 

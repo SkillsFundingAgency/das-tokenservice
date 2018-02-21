@@ -34,12 +34,12 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
             return result;
         }
 
-        public void StartRefresh(TokenRefreshAuditEntry auditEntry)
+        public void RefreshStarted(TokenRefreshAuditEntry auditEntry)
         {
             auditEntry.ActualRefreshStart = DateTime.UtcNow;
         }
 
-        public void EndRefresh(TokenRefreshAuditEntry auditEntry)
+        public void RefreshEnded(TokenRefreshAuditEntry auditEntry)
         {
             auditEntry.ActualRefreshEnd = DateTime.UtcNow;
         }

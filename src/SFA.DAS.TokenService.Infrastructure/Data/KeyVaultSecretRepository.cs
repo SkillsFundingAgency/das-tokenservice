@@ -8,15 +8,6 @@ using SFA.DAS.TokenService.Infrastructure.Configuration;
 
 namespace SFA.DAS.TokenService.Infrastructure.Data
 {
-#if UseDummyTokens
-    public class DummySecretRepository : ISecretRepository
-    {
-        public Task<string> GetSecretAsync(string name)
-        {
-            return Task.FromResult(name);
-        }
-    }
-#else
     public class KeyVaultSecretRepository : ISecretRepository
     {
         private readonly KeyVaultConfiguration _configuration;
@@ -54,5 +45,4 @@ namespace SFA.DAS.TokenService.Infrastructure.Data
             return authenticationResult.AccessToken;
         }
     }
-#endif
 }
