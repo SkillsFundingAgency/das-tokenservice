@@ -23,7 +23,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
         private readonly Task<OAuthAccessToken> _initialiseTask;
         private OAuthAccessToken _cachedAccessToken;
 
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource _cancellationTokenSource;
 
         public HmrcAuthTokenBroker(
             [RequiredPolicy(HmrcExecutionPolicy.Name)] ExecutionPolicy executionPolicy, 
@@ -60,7 +60,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
 
         private void StartTokenBackgroundRefresh(OAuthAccessToken token)
         {
-            _cancellationTokenSource.Cancel();
+            DisposeCancellationToken();
             _cancellationTokenSource = new CancellationTokenSource();
             _tokenRefresher.StartTokenBackgroundRefreshAsync(token, _cancellationTokenSource.Token, RefreshTokenAsync);
         }
@@ -114,8 +114,18 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
 
         public void Dispose()
         {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
+            DisposeCancellationToken();
+        }
+
+        public void DisposeCancellationToken()
+        {
+            if (_cancellationTokenSource != null)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+            }
+
+            _cancellationTokenSource = null;
         }
     }
 }
