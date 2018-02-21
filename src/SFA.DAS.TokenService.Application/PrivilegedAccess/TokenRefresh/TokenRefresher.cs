@@ -69,7 +69,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
             do
             {
                 auditItem.RefreshAttemps++;
-                newToken = await TryRefresh(token, cancellationToken, refreshToken);
+                newToken = await TryRefresh(token, refreshToken);
                 if (newToken == null)
                 {
                     await Task.Delay(_parameters.RetryInterval, cancellationToken);
@@ -81,14 +81,13 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
 
         private Task<OAuthAccessToken> TryRefresh(
             OAuthAccessToken token,
-            CancellationToken cancellationToken,
             Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken)
         {
             try
             {
                 return refreshToken(token);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // we need to keep trying
                 return Task.FromResult<OAuthAccessToken>(null);
