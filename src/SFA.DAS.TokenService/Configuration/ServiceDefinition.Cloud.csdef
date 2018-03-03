@@ -1,11 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ServiceDefinition name="SFA.DAS.TokenService" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2015-04.2.6">
-  <WebRole name="SFA.DAS.TokenService.Api" vmsize="Standard_D2_v2">
+  <WebRole name="SFA.DAS.TokenService.Api" vmsize="Small">
     <Sites>
       <Site name="Web">
         <Bindings>
           <Binding name="Endpoint1" endpointName="Endpoint1" />
-          <Binding name="Endpoint2" endpointName="Endpoint2" />
         </Bindings>
       </Site>
     </Sites>
@@ -24,8 +23,7 @@
       <Setting name="EnvironmentName" />
     </ConfigurationSettings>
     <Endpoints>
-      <InputEndpoint name="Endpoint1" protocol="https" port="443" certificate="WebSslCert" loadBalancer="das-tok-ilb"/>
-      <InputEndpoint name="Endpoint2" protocol="http" port="80" loadBalancer="das-tok-ilb"/>
+      <InputEndpoint name="Endpoint1" protocol="https" port="443" certificate="WebSslCert"/>
     </Endpoints>
     <Certificates>
       <Certificate name="WebSslCert" storeLocation="LocalMachine" storeName="My" />
