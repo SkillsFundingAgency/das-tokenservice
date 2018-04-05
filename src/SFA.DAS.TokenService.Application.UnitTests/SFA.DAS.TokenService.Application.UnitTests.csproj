@@ -62,6 +62,9 @@
   <ItemGroup>
     <Compile Include="NoopExecutionPolicy.cs" />
     <Compile Include="PrivilegedAccess\GetPrivilegedAccessToken\PrivilegedAccessQueryHandlerTests\WhenHandlingPrivilegedAccessQuery.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\DateTimeExtensions\GetPercentageTowardsTests.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\TokenRefresherTests\WhenBackgroundTokenRefreshRequested.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\TokenRefresherParametersTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +84,7 @@
       <Name>SFA.DAS.TokenService.Infrastructure</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
+using NLog;
 using Polly;
 using SFA.DAS.EAS.Infrastructure.ExecutionPolicies;
-using SFA.DAS.NLog.Logger;
 
 namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies
 {
@@ -15,14 +11,14 @@ namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies
     {
         public const string Name = "HMRC Policy";
 
-        private readonly ILog _logger;
+        private readonly ILogger _logger;
         private readonly Policy TooManyRequestsPolicy;
         private readonly Policy ServiceUnavailablePolicy;
         private readonly Policy InternalServerErrorPolicy;
         private readonly Policy RequestTimeoutPolicy;
         private readonly Policy UnauthorizedPolicy;
 
-        public HmrcExecutionPolicy(ILog logger)
+        public HmrcExecutionPolicy(ILogger logger)
         {
             _logger = logger;
 
