@@ -50,7 +50,9 @@
   <ItemGroup>
     <Compile Include="PrivilegedAccess\TokenRefresh\DateTimeExtensions.cs" />
     <Compile Include="PrivilegedAccess\TokenRefresh\HmrcAuthTokenBroker.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\HmrcAuthTokenBrokerConfig.cs" />
     <Compile Include="PrivilegedAccess\TokenRefresh\IHmrcAuthTokenBroker.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\IHmrcAuthTokenBrokerConfig.cs" />
     <Compile Include="PrivilegedAccess\TokenRefresh\ITokenRefreshAudit.cs" />
     <Compile Include="PrivilegedAccess\TokenRefresh\ITokenRefresher.cs" />
     <Compile Include="PrivilegedAccess\GetPrivilegedAccessToken\PrivilegedAccessQuery.cs" />
