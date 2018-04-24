@@ -63,6 +63,7 @@
     <Compile Include="NoopExecutionPolicy.cs" />
     <Compile Include="PrivilegedAccess\GetPrivilegedAccessToken\PrivilegedAccessQueryHandlerTests\WhenHandlingPrivilegedAccessQuery.cs" />
     <Compile Include="PrivilegedAccess\TokenRefresh\DateTimeExtensions\GetPercentageTowardsTests.cs" />
+    <Compile Include="PrivilegedAccess\TokenRefresh\HmrcAuthTokenBrokerTests.cs" />
     <Compile Include="PrivilegedAccess\TokenRefresh\TokenRefresherTests\WhenBackgroundTokenRefreshRequested.cs" />
     <Compile Include="PrivilegedAccess\TokenRefresh\TokenRefresherParametersTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

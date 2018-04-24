@@ -19,6 +19,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
         private readonly ISecretRepository _secretRepository;
         private readonly ITotpService _totpService;
         private readonly ITokenRefresher _tokenRefresher;
+        private readonly IHmrcAuthTokenBrokerConfig _hmrcAuthTokenBrokerConfig;
 
         private readonly Task<OAuthAccessToken> _initialiseTask;
         private OAuthAccessToken _cachedAccessToken;
@@ -31,7 +32,8 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
             IOAuthTokenService tokenService,
             ISecretRepository secretRepository,
             ITotpService totpService,
-            ITokenRefresher tokenRefresher)
+            ITokenRefresher tokenRefresher,
+            IHmrcAuthTokenBrokerConfig hmrcAuthTokenBrokerConfig)
         {
             _secretRepository = secretRepository;
             _totpService = totpService;
@@ -39,6 +41,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
             _logger = logger;
             _executionPolicy = executionPolicy;
             _tokenRefresher = tokenRefresher;
+            _hmrcAuthTokenBrokerConfig = hmrcAuthTokenBrokerConfig;
             _initialiseTask = InitialiseToken();
         }
 
@@ -83,6 +86,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
                 _logger.Debug($"Refreshing token (expired {token.ExpiresAt})");
                 var privilegedAccessToken = await GetPrivilegedAccessToken();
                 var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(privilegedAccessToken, token.RefreshToken));
+                _logger.Debug($"Refresh token successful (new expiry {newToken?.ExpiresAt.ToString("yy-MMM-dd ddd HH:mm:ss") ?? "not available - new token is null"})");
                 return newToken;
             }
             catch (Exception ex)
@@ -92,15 +96,32 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
             }
         }
 
-        private async Task<OAuthAccessToken> GetTokenFromServiceAsync()
+        private Task<OAuthAccessToken> GetTokenFromServiceAsync()
         {
-            var privilegedAccessToken = await GetPrivilegedAccessToken();
-            var tempToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken));
-            if(tempToken != null)
+            return Task.Run(async () =>
             {
+                int attempts = 0;
+
+                OAuthAccessToken tempToken = null;
+                while (tempToken == null)
+                {
+                    _logger.Debug($"Initial call to get a token: attempt {++attempts}");
+
+                    var privilegedAccessToken = await GetPrivilegedAccessToken();
+                    tempToken = await _executionPolicy.ExecuteAsync(async () =>
+                        await _tokenService.GetAccessToken(privilegedAccessToken));
+
+                    if (tempToken == null)
+                    {
+                        _logger.Warn($"The attempt to get a token from HMRC failed - sleeping {_hmrcAuthTokenBrokerConfig.RetryDelay} and trying again");
+                        await Task.Delay(_hmrcAuthTokenBrokerConfig.RetryDelay);
+                    }
+                }
+
                 _cachedAccessToken = tempToken;
-            }
-            return _cachedAccessToken;
+
+                return _cachedAccessToken;
+            });
         }
 
         private async Task<string> GetPrivilegedAccessToken()
@@ -108,7 +129,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
             _logger.Debug("Attempting to get privileged access token from service using refresh token");
             var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
             var privilegedToken = _totpService.Generate(secret);
-            _logger.Debug("Attempting to get privileged access token from service using refresh token");
+            _logger.Debug("Attempt to get privileged access token successfully");
             return privilegedToken;
         }
 

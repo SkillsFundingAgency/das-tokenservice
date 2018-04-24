@@ -41,6 +41,7 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
         private PrivilegedAccessQuery _query;
         private Mock<ILogger> _logger;
         private Mock<ITokenRefresher> _tokenRefresher;
+        private Mock<IHmrcAuthTokenBrokerConfig> _hmrcAuthBrokenConfig;
 
         [SetUp]
         public void Arrange()
@@ -52,6 +53,9 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
             _totpService = new Mock<ITotpService>();
             _totpService.Setup(g => g.Generate(OgdSecret))
                 .Returns(TotpCode);
+
+            _hmrcAuthBrokenConfig = new Mock<IHmrcAuthTokenBrokerConfig>();
+            _hmrcAuthBrokenConfig.Setup(config => config.RetryDelay).Returns(TimeSpan.FromSeconds(0));
 
             _oauthTokenService = new Mock<IOAuthTokenService>();
             _oauthTokenService.Setup(s => s.GetAccessToken(TotpCode))
@@ -83,7 +87,8 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.GetPrivile
                 _oauthTokenService.Object,
                 _secretRepository.Object,
                 _totpService.Object,
-                _tokenRefresher.Object
+                _tokenRefresher.Object,
+                _hmrcAuthBrokenConfig.Object
             );
 
             _handler = new PrivilegedAccessQueryHandler(hmrcAuthTokenContainer);
