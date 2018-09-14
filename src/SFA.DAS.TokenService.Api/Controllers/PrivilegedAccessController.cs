@@ -22,7 +22,7 @@ namespace SFA.DAS.TokenService.Api.Controllers
 
         [HttpGet]
         [Route("", Name = "GetPrivilegedAccessToken")]
-        [Authorize]
+        [Authorize(Roles="PrivilegedAccess")]
         public async Task<IHttpActionResult> GetPrivilegedAccessToken()
         {
             try
