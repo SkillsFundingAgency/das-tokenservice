@@ -31,8 +31,8 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.TokenRefre
             }
         }
 
-        [TestCase(2000,  250, 60)]
         [TestCase(2000,  500, 80)]
+        [TestCase(2000,  750, 60)]
         [TestCase(2000, 1000, 80)]
         public async Task WeShouldAlwaysHaveAValidToken(
             int runDurationMsecs,
