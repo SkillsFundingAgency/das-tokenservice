@@ -232,7 +232,7 @@
                 },
                 "parameters": {
                     "keyVaultName": {
-                        "value": "[variables('appServiceName')]"
+                        "value": "[variables('keyvaultName')]"
                     },
                     "keyVaultAccessPolicies": {
                         "value": [
