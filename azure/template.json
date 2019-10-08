@@ -249,6 +249,9 @@
                                 }
                             }
                         ]
+                    },
+                    "enableSoftDelete": {
+                        "value": true
                     }
                 }
             }
