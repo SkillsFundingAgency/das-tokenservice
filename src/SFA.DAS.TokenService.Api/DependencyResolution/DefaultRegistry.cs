@@ -16,9 +16,12 @@
 // --------------------------------------------------------------------------------------------------------------------
 using MediatR;
 using Microsoft.Azure;
+using SFA.DAS.TokenService.Domain.Data;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
+using SFA.DAS.TokenService.Infrastructure.Data;
 using StructureMap;
 using StructureMap.Graph;
+using System;
 using System.Configuration;
 
 namespace SFA.DAS.TokenService.Api.DependencyResolution
@@ -61,6 +64,17 @@ namespace SFA.DAS.TokenService.Api.DependencyResolution
                 Url = ConfigurationManager.AppSettings["HmrcTokenUri"],
                 ClientId = ConfigurationManager.AppSettings["HmrcTokenClientId"]
             });
+
+            var msiEndpoint = Environment.GetEnvironmentVariable("MSI_ENDPOINT");
+
+            if (!string.IsNullOrEmpty(msiEndpoint))
+            {
+                For<ISecretRepository>().Use<KeyVaultSecretRepositoryMSIAuth>();
+            }
+            else
+            {
+                For<ISecretRepository>().Use<KeyVaultSecretRepository>();
+            }
         }
 
         private void RegisterExecutionPolicies()
