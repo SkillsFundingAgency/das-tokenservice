@@ -22,7 +22,7 @@ namespace SFA.DAS.TokenService.Infrastructure.Data
 
         public async Task<string> GetSecretAsync(string name)
         {
-            _logger.Debug($"Getting secret {name} from KeyVault");
+            _logger.Debug($"Getting secret {name} from KeyVault using Managed Service Identity");
             AzureServiceTokenProvider azureServiceTokenProvider = new AzureServiceTokenProvider();
             KeyVaultClient keyVaultClient = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(azureServiceTokenProvider.KeyVaultTokenCallback));
 
