@@ -1,4 +1,6 @@
-﻿using System.Web.Http;
+﻿using System.Configuration;
+using System.Web.Http;
+using Microsoft.ApplicationInsights.Extensibility;
 using SFA.DAS.TokenService.Infrastructure.Logging;
 
 namespace SFA.DAS.TokenService.Api
@@ -7,6 +9,8 @@ namespace SFA.DAS.TokenService.Api
     {
         protected void Application_Start()
         {
+            TelemetryConfiguration.Active.InstrumentationKey = ConfigurationManager.AppSettings["APPINSIGHTS_INSTRUMENTATIONKEY"];
+
             LoggingConfig.ConfigureLogging();
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
