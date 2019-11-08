@@ -12,10 +12,8 @@
     <summary>Client library for DAS token Api</summary>
     <releaseNotes />
     <dependencies>
-      <group targetFramework=".NETFramework4.6.2">
-        <dependency id="Microsoft.IdentityModel.Clients.ActiveDirectory" version="3.13.8"/>
-        <dependency id="Newtonsoft.Json" version="9.0.1"/>
-      </group>
+      <dependency id="Microsoft.IdentityModel.Clients.ActiveDirectory" version="3.13.8"/>
+      <dependency id="Newtonsoft.Json" version="9.0.1"/>
     </dependencies>
   </metadata>
   <files>
