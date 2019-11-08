@@ -12,14 +12,14 @@
     <summary>Client library for DAS token Api</summary>
     <releaseNotes />
     <dependencies>
-      <group targetFramework=".NETFramework4.5">
+      <group targetFramework=".NETFramework4.6.2">
         <dependency id="Microsoft.IdentityModel.Clients.ActiveDirectory" version="3.13.8"/>
         <dependency id="Newtonsoft.Json" version="9.0.1"/>
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\Release\SFA.DAS.TokenService.Api.Client.dll" target="lib\net45\SFA.DAS.TokenService.Api.Client.dll" />
-    <file src="bin\Release\SFA.DAS.TokenService.Api.Types.dll" target="lib\net45\SFA.DAS.TokenService.Api.Types.dll" />
+    <file src="bin\Release\SFA.DAS.TokenService.Api.Client.dll" target="lib\net462\SFA.DAS.TokenService.Api.Client.dll" />
+    <file src="bin\Release\SFA.DAS.TokenService.Api.Types.dll" target="lib\net462\SFA.DAS.TokenService.Api.Types.dll" />
   </files>
 </package>
