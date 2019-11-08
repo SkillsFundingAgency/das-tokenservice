@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -20,11 +18,6 @@ namespace SFA.DAS.TokenService.Api.Client
             using (var handler = new WebRequestHandler())
             using (var client = new HttpClient(handler))
             {
-                if (_configuration.TokenCertificate != null)
-                {
-                    handler.ClientCertificates.Add(_configuration.TokenCertificate);
-                }
-
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authenticationResult.AccessToken);
 
                 var response = await client.GetAsync(url);
