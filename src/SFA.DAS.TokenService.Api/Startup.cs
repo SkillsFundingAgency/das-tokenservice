@@ -2,6 +2,7 @@
 using Microsoft.Owin;
 using Microsoft.Owin.Security.ActiveDirectory;
 using Owin;
+using System.Configuration;
 
 [assembly: OwinStartup(typeof(SFA.DAS.TokenService.Api.Startup))]
 namespace SFA.DAS.TokenService.Api
@@ -15,10 +16,10 @@ namespace SFA.DAS.TokenService.Api
                {
                    TokenValidationParameters = new System.IdentityModel.Tokens.TokenValidationParameters
                    {
-                       ValidAudience = CloudConfigurationManager.GetSetting("idaAudience"),
+                       ValidAudience = ConfigurationManager.AppSettings["idaAudience"],
                        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                    },
-                   Tenant = CloudConfigurationManager.GetSetting("idaTenant")
+                   Tenant = ConfigurationManager.AppSettings["idaTenant"]
                });
         }
     }

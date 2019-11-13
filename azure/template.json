@@ -1,0 +1,266 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environmentName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the environment."
+            }
+        },
+        "resourceEnvironmentName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the resource environment."
+            }
+        },
+        "serviceName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the service."
+            }
+        },
+        "sharedBackEndAppServicePlan": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the shared back end App Service Plan."
+            }
+        },
+        "sharedBackEndAppServicePlanResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the resource group where the shared back end App Service Plan is located."
+            }
+        },
+        "appServiceAllowedIPs": {
+            "type": "array",
+            "defaultValue": [
+            ],
+            "metadata": {
+                "description": "An array of IPs that are permitted to access the app service."
+            }
+        },
+        "loggingRedisConnectionString": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The connection string for the Redis logging cache."
+            }
+        },
+        "customHostName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The DNS hostname for the service."
+            }
+        },
+        "keyVaultCertificateName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the certificate stored in the shared keyvault."
+            }
+        },
+        "certKeyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the shared keyvault."
+            }
+        },
+        "certKeyVaultResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "The resource group name of the shared keyvault."
+            }
+        },
+        "idaAudience": {
+            "type": "string"
+        },
+        "idaTenant": {
+            "type": "string"
+        },
+        "hmrcTokenUri": {
+            "type": "string"
+        },
+        "hmrcTokenClientId": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
+        "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
+        "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
+        "keyvaultName": "[concat(variables('resourceNamePrefix'), '-kv')]",
+        "keyvaultUri": "[concat('https://', variables('keyvaultName'), '.vault.azure.net/')]"
+    },
+    "resources": [
+        {
+            "condition": "[greater(length(parameters('customHostName')), 0)]",
+            "apiVersion": "2017-05-10",
+            "name": "app-service-certificate",
+            "resourceGroup": "[parameters('sharedBackEndAppServicePlanResourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'app-service-certificate.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "keyVaultCertificateName": {
+                        "value": "[parameters('keyVaultCertificateName')]"
+                    },
+                    "keyVaultName": {
+                        "value": "[parameters('certKeyVaultName')]"
+                    },
+                    "keyVaultResourceGroup": {
+                        "value": "[parameters('certKeyVaultResourceGroupName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "application-insights",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'application-insights.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appInsightsName": {
+                        "value": "[variables('appServiceName')]"
+                    },
+                    "attachedService": {
+                        "value": "[variables('appServiceName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "app-service",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'app-service.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "appServiceName": {
+                        "value": "[variables('appServiceName')]"
+                    },
+                    "appServicePlanName": {
+                        "value": "[parameters('sharedBackEndAppServicePlan')]"
+                    },
+                    "appServicePlanResourceGroup": {
+                        "value": "[parameters('sharedBackEndAppServicePlanResourceGroupName')]"
+                    },
+                    "appServiceAppSettings": {
+                        "value": [
+                            {
+                                "name": "EnvironmentName",
+                                "value": "[parameters('environmentName')]"
+                            },
+                            {
+                                "name": "idaAudience",
+                                "value": "[parameters('idaAudience')]"
+                            },
+                            {
+                                "name": "idaTenant",
+                                "value": "[parameters('idaTenant')]"
+                            },
+                            {
+                                "name": "KeyVaultUri",
+                                "value": "[variables('keyvaultUri')]"
+                            },
+                            {
+                                "name": "HmrcTokenUri",
+                                "value": "[parameters('hmrcTokenUri')]"
+                            },
+                            {
+                                "name": "HmrcTokenClientId",
+                                "value": "[parameters('hmrcTokenClientId')]"
+                            },
+                            {
+                                "name": "LoggingRedisConnectionString",
+                                "value": "[parameters('loggingRedisConnectionString')]"
+                            },
+                            {
+                                "name": "LoggingRedisKey",
+                                "value": "logstash"
+                            },
+                            {
+                                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                "value": "[reference('application-insights').outputs.InstrumentationKey.value]"
+                            },
+                            {
+                                "name": "WEBSITE_SWAP_WARMUP_PING_PATH",
+                                "value": "/api/Healthcheck"
+                            },
+                            {
+                                "name": "WEBSITE_SWAP_WARMUP_PING_STATUSES",
+                                "value": "200"
+                            }
+                        ]
+                    },
+                    "customHostName": {
+                        "value": "[parameters('customHostName')]"
+                    },
+                    "certificateThumbprint": {
+                        "value": "[if(greater(length(parameters('customHostname')), 0), reference('app-service-certificate', '2018-11-01').outputs.certificateThumbprint.value, '')]"
+                    },
+                    "ipSecurityRestrictions": {
+                        "value": "[parameters('appServiceAllowedIPs')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "app-service-certificate"
+            ]
+        },
+        {
+            "apiVersion": "2017-05-10",
+            "name": "keyvault",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'keyvault.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "keyVaultName": {
+                        "value": "[variables('keyvaultName')]"
+                    },
+                    "keyVaultAccessPolicies": {
+                        "value": [
+                            {
+                                "objectId": "[reference('app-service').outputs.managedServiceIdentityId.value]",
+                                "tenantId": "[subscription().tenantId]",
+                                "permissions": {
+                                    "secrets": [
+                                        "Get"
+                                    ],
+                                    "certificates": [
+                                        "Get"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "enableSoftDelete": {
+                        "value": true
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "AppServiceName": {
+            "type": "string",
+            "value": "[variables('appServiceName')]"
+        }
+    }
+}
