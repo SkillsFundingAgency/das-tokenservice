@@ -21,12 +21,12 @@ namespace SFA.DAS.TokenService.Infrastructure.Services
             _httpClient.AcceptHeaders.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.hmrc.1.0+json"));
         }
 
-        public async Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken)
+        public async Task<OAuthAccessToken> GetAccessToken(string oneTimePassword)
         {
             var request = new OAuthTokenRequest
             {
                 ClientId = _configuration.ClientId,
-                ClientSecret = $"{privilegedAccessToken}{_configuration.ClientSecret}",
+                ClientSecret = $"{oneTimePassword}{_configuration.ClientSecret}",
                 GrantType = "client_credentials",
                 Scopes = "read:apprenticeship-levy"
             };
@@ -41,12 +41,12 @@ namespace SFA.DAS.TokenService.Infrastructure.Services
             };
         }
 
-        public async Task<OAuthAccessToken> GetAccessTokenFromRefreshToken(string privilegedAccessToken, string refreshToken)
+        public async Task<OAuthAccessToken> GetAccessTokenFromRefreshToken(string oneTimePassword, string refreshToken)
         {
             var request = new OAuthTokenRefreshRequest
             {
                 ClientId = _configuration.ClientId,
-                ClientSecret = $"{privilegedAccessToken}{_configuration.ClientSecret}",
+                ClientSecret = $"{oneTimePassword}{_configuration.ClientSecret}",
                 GrantType = "client_credentials",
                 Scopes = "read:apprenticeship-levy",
                 RefreshToken = refreshToken
