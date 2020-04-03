@@ -84,7 +84,7 @@
             "type": "string"
         },
         "hmrcTokenSecret": {
-            "type": "string"
+            "type": "securestring"
         }
     },
     "variables": {
