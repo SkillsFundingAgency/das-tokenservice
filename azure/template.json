@@ -190,7 +190,7 @@
                                 "value": "[parameters('hmrcTokenClientId')]"
                             },
                             {
-                                "name": "HmrcTokenClientId",
+                                "name": "HmrcTokenSecret",
                                 "value": "[parameters('hmrcTokenSecret')]"
                             },
                             {
