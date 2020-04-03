@@ -26,7 +26,7 @@ namespace SFA.DAS.TokenService.Infrastructure.Services
             var request = new OAuthTokenRequest
             {
                 ClientId = _configuration.ClientId,
-                ClientSecret = clientSecret,
+                ClientSecret = clientSecret+_configuration.ClientSecret,
                 GrantType = "client_credentials",
                 Scopes = "read:apprenticeship-levy"
             };
