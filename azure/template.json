@@ -82,6 +82,9 @@
         },
         "hmrcTokenClientId": {
             "type": "string"
+        },
+        "hmrcTokenSecret": {
+            "type": "securestring"
         }
     },
     "variables": {
@@ -185,6 +188,10 @@
                             {
                                 "name": "HmrcTokenClientId",
                                 "value": "[parameters('hmrcTokenClientId')]"
+                            },
+                            {
+                                "name": "HmrcTokenSecret",
+                                "value": "[parameters('hmrcTokenSecret')]"
                             },
                             {
                                 "name": "LoggingRedisConnectionString",
