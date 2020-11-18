@@ -150,7 +150,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('deploymentUrlBase'),'app-service.json')]",
+                    "uri": "[concat(variables('deploymentUrlBase'),'app-service-v2.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
@@ -164,56 +164,58 @@
                         "value": "[parameters('sharedBackEndAppServicePlanResourceGroupName')]"
                     },
                     "appServiceAppSettings": {
-                        "value": [
-                            {
-                                "name": "EnvironmentName",
-                                "value": "[parameters('environmentName')]"
-                            },
-                            {
-                                "name": "idaAudience",
-                                "value": "[parameters('idaAudience')]"
-                            },
-                            {
-                                "name": "idaTenant",
-                                "value": "[parameters('idaTenant')]"
-                            },
-                            {
-                                "name": "KeyVaultUri",
-                                "value": "[variables('keyvaultUri')]"
-                            },
-                            {
-                                "name": "HmrcTokenUri",
-                                "value": "[parameters('hmrcTokenUri')]"
-                            },
-                            {
-                                "name": "HmrcTokenClientId",
-                                "value": "[parameters('hmrcTokenClientId')]"
-                            },
-                            {
-                                "name": "HmrcTokenSecret",
-                                "value": "[parameters('hmrcTokenSecret')]"
-                            },
-                            {
-                                "name": "LoggingRedisConnectionString",
-                                "value": "[parameters('loggingRedisConnectionString')]"
-                            },
-                            {
-                                "name": "LoggingRedisKey",
-                                "value": "logstash"
-                            },
-                            {
-                                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                                "value": "[reference('application-insights').outputs.InstrumentationKey.value]"
-                            },
-                            {
-                                "name": "WEBSITE_SWAP_WARMUP_PING_PATH",
-                                "value": "/api/Healthcheck"
-                            },
-                            {
-                                "name": "WEBSITE_SWAP_WARMUP_PING_STATUSES",
-                                "value": "200"
-                            }
-                        ]
+                        "value": {
+                            "array": [
+                                {
+                                    "name": "EnvironmentName",
+                                    "value": "[parameters('environmentName')]"
+                                },
+                                {
+                                    "name": "idaAudience",
+                                    "value": "[parameters('idaAudience')]"
+                                },
+                                {
+                                    "name": "idaTenant",
+                                    "value": "[parameters('idaTenant')]"
+                                },
+                                {
+                                    "name": "KeyVaultUri",
+                                    "value": "[variables('keyvaultUri')]"
+                                },
+                                {
+                                    "name": "HmrcTokenUri",
+                                    "value": "[parameters('hmrcTokenUri')]"
+                                },
+                                {
+                                    "name": "HmrcTokenClientId",
+                                    "value": "[parameters('hmrcTokenClientId')]"
+                                },
+                                {
+                                    "name": "HmrcTokenSecret",
+                                    "value": "[parameters('hmrcTokenSecret')]"
+                                },
+                                {
+                                    "name": "LoggingRedisConnectionString",
+                                    "value": "[parameters('loggingRedisConnectionString')]"
+                                },
+                                {
+                                    "name": "LoggingRedisKey",
+                                    "value": "logstash"
+                                },
+                                {
+                                    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                    "value": "[reference('application-insights').outputs.InstrumentationKey.value]"
+                                },
+                                {
+                                    "name": "WEBSITE_SWAP_WARMUP_PING_PATH",
+                                    "value": "/api/Healthcheck"
+                                },
+                                {
+                                    "name": "WEBSITE_SWAP_WARMUP_PING_STATUSES",
+                                    "value": "200"
+                                }
+                            ]
+                        }
                     },
                     "customHostName": {
                         "value": "[parameters('customHostName')]"
