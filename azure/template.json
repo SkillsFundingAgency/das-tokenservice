@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "environmentName": {
@@ -85,19 +85,39 @@
         },
         "hmrcTokenSecret": {
             "type": "securestring"
+        },
+        "tags": {
+            "type": "object"
+        },
+        "resourceGroupLocation": {
+            "type": "string"
+        },
+        "sharedBackEndSubnetResourceId": {
+            "type": "string"
         }
     },
     "variables": {
         "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
         "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
+        "resourceGroupName": "[concat(variables('resourceNamePrefix'),'-rg')]",
         "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
         "keyvaultName": "[concat(variables('resourceNamePrefix'), '-kv')]",
         "keyvaultUri": "[concat('https://', variables('keyvaultName'), '.vault.azure.net/')]"
     },
     "resources": [
         {
+            "apiVersion": "2019-10-01",
+            "name": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/resourceGroups",
+            "location": "[parameters('resourceGroupLocation')]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+
+            }
+        },
+        {
             "condition": "[greater(length(parameters('customHostName')), 0)]",
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "app-service-certificate",
             "resourceGroup": "[parameters('sharedBackEndAppServicePlanResourceGroupName')]",
             "type": "Microsoft.Resources/deployments",
@@ -124,9 +144,10 @@
             }
         },
         {
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "application-insights",
             "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -144,9 +165,10 @@
             }
         },
         {
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "app-service",
             "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -162,6 +184,9 @@
                     },
                     "appServicePlanResourceGroup": {
                         "value": "[parameters('sharedBackEndAppServicePlanResourceGroupName')]"
+                    },
+                    "subnetResourceId":{
+                        "value":"[parameters('sharedBackEndSubnetResourceId')]"
                     },
                     "appServiceAppSettings": {
                         "value": {
@@ -233,9 +258,10 @@
             ]
         },
         {
-            "apiVersion": "2017-05-10",
+            "apiVersion": "2019-10-01",
             "name": "keyvault",
             "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
@@ -270,6 +296,10 @@
         }
     ],
     "outputs": {
+        "ResourceGroupName": {
+            "type": "string",
+            "value": "[variables('resourceGroupName')]"
+        },
         "AppServiceName": {
             "type": "string",
             "value": "[variables('appServiceName')]"
