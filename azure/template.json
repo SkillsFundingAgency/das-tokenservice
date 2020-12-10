@@ -119,7 +119,7 @@
             "condition": "[greater(length(parameters('customHostName')), 0)]",
             "apiVersion": "2020-06-01",
             "name": "app-service-certificate",
-            "resourceGroup": "[variables('resourceGroupName')]",
+            "resourceGroup": "[parameters('sharedBackEndAppServicePlanResourceGroupName')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
