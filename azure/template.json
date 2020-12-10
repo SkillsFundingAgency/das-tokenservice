@@ -136,9 +136,6 @@
                     },
                     "keyVaultResourceGroup": {
                         "value": "[parameters('certKeyVaultResourceGroupName')]"
-                    },
-                    "serverFarmId": {
-                        "value": "[resourceId(parameters('sharedBackEndAppServicePlanResourceGroupName'), 'Microsoft.Web/serverfarms', parameters('sharedBackEndAppServicePlan'))]"
                     }
                 }
             }
