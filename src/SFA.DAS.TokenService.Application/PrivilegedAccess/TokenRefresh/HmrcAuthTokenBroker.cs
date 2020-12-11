@@ -84,8 +84,8 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
             try
             {
                 _logger.Debug($"Refreshing token (expired {token.ExpiresAt})");
-                var oneTimePassword = await GetOneTimePassword();
-                var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(oneTimePassword, token.RefreshToken));
+                var privilegedAccessToken = await GetPrivilegedAccessToken();
+                var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(privilegedAccessToken, token.RefreshToken));
                 _logger.Debug($"Refresh token successful (new expiry {newToken?.ExpiresAt.ToString("yy-MMM-dd ddd HH:mm:ss") ?? "not available - new token is null"})");
                 return newToken;
             }
@@ -107,9 +107,9 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
                 {
                     _logger.Debug($"Initial call to get a token: attempt {++attempts}");
 
-                    var oneTimePassword = await GetOneTimePassword();
+                    var privilegedAccessToken = await GetPrivilegedAccessToken();
                     tempToken = await _executionPolicy.ExecuteAsync(async () =>
-                        await _tokenService.GetAccessToken(oneTimePassword));
+                        await _tokenService.GetAccessToken(privilegedAccessToken));
 
                     if (tempToken == null)
                     {
@@ -124,7 +124,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
             });
         }
 
-        private async Task<string> GetOneTimePassword()
+        private async Task<string> GetPrivilegedAccessToken()
         {
             _logger.Debug("Attempting to get privileged access token from service using refresh token");
             var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);

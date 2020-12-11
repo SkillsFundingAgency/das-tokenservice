@@ -62,8 +62,7 @@ namespace SFA.DAS.TokenService.Api.DependencyResolution
             For<OAuthTokenServiceConfiguration>().Use(() => new OAuthTokenServiceConfiguration
             {
                 Url = ConfigurationManager.AppSettings["HmrcTokenUri"],
-                ClientId = ConfigurationManager.AppSettings["HmrcTokenClientId"],
-                ClientSecret = ConfigurationManager.AppSettings["HmrcTokenSecret"]
+                ClientId = ConfigurationManager.AppSettings["HmrcTokenClientId"]
             });
 
             var msiEndpoint = Environment.GetEnvironmentVariable("MSI_ENDPOINT");
