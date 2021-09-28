@@ -15,8 +15,7 @@ namespace SFA.DAS.TokenService.Api.Client
         public async Task<string> GetAsync(string url)
         {
             var authenticationResult = await GetAuthenticationResult(_configuration.ClientId, _configuration.ClientSecret, _configuration.IdentifierUri, _configuration.Tenant);
-            using (var handler = new WebRequestHandler())
-            using (var client = new HttpClient(handler))
+            using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authenticationResult.AccessToken);
 
