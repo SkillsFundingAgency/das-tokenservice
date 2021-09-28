@@ -25,9 +25,4 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 	</ItemGroup>
-	<ItemGroup>
-	  <Reference Include="System.Net.Http.WebRequest">
-	    <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.2\System.Net.Http.WebRequest.dll</HintPath>
-	  </Reference>
-	</ItemGroup>
 </Project>
