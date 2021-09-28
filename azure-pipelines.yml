@@ -55,7 +55,7 @@ steps:
     displayName: "NuGet pack"
     inputs:
       command: pack
-      packagesToPack: "src/SFA.DAS.TokenService.Api.Client/SFA.DAS.TokenService.Api.Client.csproj;"
+      packagesToPack: "src/SFA.DAS.TokenService.Api.Client/SFA.DAS.TokenService.Api.Client.csproj;src/SFA.DAS.TokenService.Api.Types/SFA.DAS.TokenService.Api.Types.csproj"
       packDestination: "$(build.artifactstagingdirectory)/publish"
       versioningScheme: byBuildNumber
 
