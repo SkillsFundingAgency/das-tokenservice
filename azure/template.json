@@ -94,6 +94,18 @@
         },
         "sharedBackEndSubnetResourceId": {
             "type": "string"
+        },
+        "logAnalyticsWorkspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the log analytics workspace resource"
+            }
+        },
+        "sharedManagementResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the management resource group"
+            }
         }
     },
     "variables": {
@@ -182,8 +194,8 @@
                     "appServicePlanResourceGroup": {
                         "value": "[parameters('sharedBackEndAppServicePlanResourceGroupName')]"
                     },
-                    "subnetResourceId":{
-                        "value":"[parameters('sharedBackEndSubnetResourceId')]"
+                    "subnetResourceId": {
+                        "value": "[parameters('sharedBackEndSubnetResourceId')]"
                     },
                     "appServiceAppSettings": {
                         "value": {
@@ -287,6 +299,12 @@
                     },
                     "enableSoftDelete": {
                         "value": true
+                    },
+                    "logAnalyticsWorkspaceName": {
+                        "value": "[parameters('logAnalyticsWorkspaceName')]"
+                    },
+                    "logAnalyticsWorkspaceResourceGroupName": {
+                        "value": "[parameters('sharedManagementResourceGroup')]"
                     }
                 }
             }
