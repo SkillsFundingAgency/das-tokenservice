@@ -51,14 +51,6 @@ jobs:
         platform: "$(buildPlatform)"
         configuration: "$(buildConfiguration)"
 
-    - task: NuGetCommand@2
-      displayName: "NuGet pack"
-      inputs:
-        command: pack
-        packagesToPack: "src/SFA.DAS.TokenService.Api.Client/SFA.DAS.TokenService.Api.Client.csproj;"
-        packDestination: "$(build.artifactstagingdirectory)/publish"
-        versioningScheme: byBuildNumber
-
     - task: SonarCloudAnalyze@1
       displayName: Run SonarCloud analysis
       condition: and(succeeded(), or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/main'), eq(variables['Build.Reason'], 'PullRequest')))
@@ -68,6 +60,14 @@ jobs:
       condition: and(succeeded(), or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/main'), eq(variables['Build.Reason'], 'PullRequest')))
       inputs:
         pollingTimeoutSec: '300'
+
+    - task: NuGetCommand@2
+      displayName: "NuGet pack"
+      inputs:
+        command: pack
+        packagesToPack: "src/SFA.DAS.TokenService.Api.Client/SFA.DAS.TokenService.Api.Client.csproj;"
+        packDestination: "$(build.artifactstagingdirectory)/publish"
+        versioningScheme: byBuildNumber
 
     - task: CopyFiles@2
       displayName: "Copy Files to: $(build.artifactstagingdirectory)"
