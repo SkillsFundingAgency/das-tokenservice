@@ -6,8 +6,6 @@ jobs:
       - Agent.OS -equals Windows_NT
   variables:
   - group: BUILD Management Resources
-    buildConfiguration: "release"
-    buildPlatform: "any cpu"
   workspace:
     clean: all
   steps:
