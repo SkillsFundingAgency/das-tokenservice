@@ -84,8 +84,7 @@
             "type": "string"
         },
         "hmrcTokenSecret": {
-            "type": "securestring",
-            "defaultValue": ""
+            "type": "securestring"
         },
         "tags": {
             "type": "object"
