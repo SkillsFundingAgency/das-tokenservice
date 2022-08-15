@@ -309,7 +309,7 @@
                         "value": "[parameters('sharedManagementResourceGroup')]"
                     },
                     "subnetResourceIdList":{
-                        "value": "[parameters('sharedBackEndSubnetResourceId')]"
+                        "value": "[createArray(parameters('sharedBackEndSubnetResourceId'))]"
                     }
                 }
             }
