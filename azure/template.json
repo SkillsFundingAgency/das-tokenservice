@@ -307,6 +307,9 @@
                     },
                     "logAnalyticsWorkspaceResourceGroupName": {
                         "value": "[parameters('sharedManagementResourceGroup')]"
+                    },
+                    "subnetResourceIdList":{
+                        "value": "[parameters('sharedBackEndSubnetResourceId')]"
                     }
                 }
             }
