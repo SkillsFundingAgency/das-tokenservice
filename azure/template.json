@@ -32,10 +32,8 @@
                 "description": "The name of the resource group where the shared back end App Service Plan is located."
             }
         },
-        "appServiceAllowedIPs": {
+        "backEndAccessRestrictions": {
             "type": "array",
-            "defaultValue": [
-            ],
             "metadata": {
                 "description": "An array of IPs that are permitted to access the app service."
             }
@@ -262,7 +260,7 @@
                         "value": "[if(greater(length(parameters('customHostname')), 0), reference(concat('app-service-certificate-', parameters('utcValue')), '2018-11-01').outputs.certificateThumbprint.value, '')]"
                     },
                     "ipSecurityRestrictions": {
-                        "value": "[parameters('appServiceAllowedIPs')]"
+                        "value": "[parameters('backEndAccessRestrictions')]"
                     }
                 }
             },
