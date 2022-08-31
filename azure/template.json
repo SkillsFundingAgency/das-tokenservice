@@ -307,6 +307,12 @@
                     },
                     "logAnalyticsWorkspaceResourceGroupName": {
                         "value": "[parameters('sharedManagementResourceGroup')]"
+                    },
+                    "subnetResourceIdList": {
+                        "value": "[createArray(parameters('sharedBackEndSubnetResourceId'))]"
+                    },
+                    "enableFirewall": {
+                        "value": true
                     }
                 }
             }
