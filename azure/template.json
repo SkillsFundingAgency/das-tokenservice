@@ -239,8 +239,8 @@
                                     "value": "logstash"
                                 },
                                 {
-                                    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                                    "value": "[reference(concat('application-insights-', parameters('utcValue'))).outputs.InstrumentationKey.value]"
+                                    "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                                    "value": "[reference(concat('application-insights-', parameters('utcValue'))).outputs.ConnectionString.value]"
                                 },
                                 {
                                     "name": "WEBSITE_SWAP_WARMUP_PING_PATH",
