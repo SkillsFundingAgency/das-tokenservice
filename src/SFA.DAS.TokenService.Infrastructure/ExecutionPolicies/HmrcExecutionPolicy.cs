@@ -8,7 +8,7 @@ namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 [PolicyName(Name)]
 public class HmrcExecutionPolicy : ExecutionPolicy
 {
-    private const string Name = "HMRC Policy";
+    public const string Name = "HMRC Policy";
 
     private readonly ILogger _logger;
 
