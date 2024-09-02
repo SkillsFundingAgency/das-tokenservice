@@ -1,12 +1,7 @@
 ﻿namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 
 [AttributeUsage(AttributeTargets.Parameter)]
-public class RequiredPolicyAttribute : Attribute
+public class RequiredPolicyAttribute(string name) : Attribute
 {
-    public RequiredPolicyAttribute(string name)
-    {
-        Name = name;
-    }
-
-    public string Name { get; }
+    public string Name { get; } = name;
 }

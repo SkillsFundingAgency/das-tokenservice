@@ -1,7 +1,7 @@
 ﻿namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 
-public class TokenRefresherParameters {
-
+public class TokenRefresherParameters
+{
     public TokenRefresherParameters()
     {
         TokenRefreshExpirationPercentage = MaximumTokenRefreshLeadTime;
