@@ -37,7 +37,7 @@ public class WhenHandlingPrivilegedAccessQuery
     private Mock<IOAuthTokenService> _oauthTokenService;
     private PrivilegedAccessQueryHandler _handler;
     private PrivilegedAccessQuery _query;
-    private Mock<ILogger> _logger;
+    private Mock<ILogger<HmrcAuthTokenBroker>> _logger;
     private Mock<ITokenRefresher> _tokenRefresher;
     private Mock<IHmrcAuthTokenBrokerConfig> _hmrcAuthBrokenConfig;
 
@@ -75,7 +75,7 @@ public class WhenHandlingPrivilegedAccessQuery
                 TokenType = RefreshedTokenType
             });
 
-        _logger = new Mock<ILogger>();
+        _logger = new Mock<ILogger<HmrcAuthTokenBroker>>();
 
         _tokenRefresher = new Mock<ITokenRefresher>();
 

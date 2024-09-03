@@ -11,7 +11,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
     private const string PrivilegedAccessSecretName = "PrivilegedAccessSecret";
 
     private readonly ExecutionPolicy _executionPolicy;
-    private readonly ILogger _logger;
+    private readonly ILogger<HmrcAuthTokenBroker> _logger;
     private readonly IOAuthTokenService _tokenService;
     private readonly ISecretRepository _secretRepository;
     private readonly ITotpService _totpService;
@@ -25,7 +25,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
 
     public HmrcAuthTokenBroker(
         [RequiredPolicy(HmrcExecutionPolicy.Name)] ExecutionPolicy executionPolicy, 
-        ILogger logger,
+        ILogger<HmrcAuthTokenBroker> logger,
         IOAuthTokenService tokenService,
         ISecretRepository secretRepository,
         ITotpService totpService,

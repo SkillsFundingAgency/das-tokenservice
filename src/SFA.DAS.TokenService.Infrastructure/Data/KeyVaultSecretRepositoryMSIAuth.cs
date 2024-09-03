@@ -6,7 +6,7 @@ using SFA.DAS.TokenService.Infrastructure.Configuration;
 
 namespace SFA.DAS.TokenService.Infrastructure.Data;
 
-public class KeyVaultSecretRepositoryMSIAuth(KeyVaultConfiguration configuration, ILogger logger) : ISecretRepository
+public class KeyVaultSecretRepositoryMSIAuth(KeyVaultConfiguration configuration, ILogger<KeyVaultSecretRepositoryMSIAuth> logger) : ISecretRepository
 {
     public async Task<string> GetSecretAsync(string name)
     {

@@ -139,7 +139,7 @@ public class HmrcAuthTokenBrokerTestFixtures
 
         return new HmrcAuthTokenBroker(
             new HmrcExecutionPolicy(Mock.Of<ILogger<HmrcExecutionPolicy>>(), new TimeSpan(0, 0, 0, 0, 10)),
-            Mock.Of<ILogger>(),
+            Mock.Of<ILogger<HmrcAuthTokenBroker>>(),
             OAuthTokenServiceMock.Object,
             SecretRepositoryMock.Object,
             _totpServiceMock.Object,
