@@ -1,8 +1,6 @@
 ﻿using SFA.DAS.TokenService.Domain.Services;
-using Simonbu11.Otp;
-using Simonbu11.Otp.Totp;
 
-namespace SFA.DAS.TokenService.Infrastructure.Services;
+namespace SFA.DAS.TokenService.Infrastructure.OneTimePassword;
 
 public class TotpService : ITotpService
 {
@@ -12,6 +10,7 @@ public class TotpService : ITotpService
         {
             SharedSecret = OtpSharedSecret.FromBase32String(secret)
         });
+        
         return generator.Generate(DateTime.UtcNow);
     }
 

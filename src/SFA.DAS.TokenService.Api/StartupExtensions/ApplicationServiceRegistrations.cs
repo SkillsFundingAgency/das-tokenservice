@@ -4,6 +4,7 @@ using SFA.DAS.TokenService.Domain.Services;
 using SFA.DAS.TokenService.Infrastructure.Data;
 using SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 using SFA.DAS.TokenService.Infrastructure.Http;
+using SFA.DAS.TokenService.Infrastructure.OneTimePassword;
 using SFA.DAS.TokenService.Infrastructure.Services;
 
 namespace SFA.DAS.TokenService.Api.StartupExtensions;
