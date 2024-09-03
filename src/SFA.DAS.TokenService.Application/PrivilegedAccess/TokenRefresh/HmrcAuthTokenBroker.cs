@@ -51,7 +51,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
     private Task<OAuthAccessToken> InitialiseToken()
     {
         return GetTokenFromServiceAsync()
-            .ContinueWith((task) =>
+            .ContinueWith(task =>
             {
                 StartTokenBackgroundRefresh(task.Result);
                 return task.Result;
@@ -103,9 +103,10 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
             var attempts = 0;
 
             OAuthAccessToken tempToken = null;
+            
             while (tempToken == null)
             {
-                _logger.LogDebug($"Initial call to get a token: attempt {++attempts}");
+                _logger.LogDebug("Initial call to get a token: attempt {Attempts}", ++attempts);
 
                 var privilegedAccessToken = await GetPrivilegedAccessToken();
                 tempToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken));

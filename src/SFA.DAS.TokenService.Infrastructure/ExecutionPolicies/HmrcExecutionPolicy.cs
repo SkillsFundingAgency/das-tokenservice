@@ -9,17 +9,27 @@ namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 public class HmrcExecutionPolicy : ExecutionPolicy
 {
     public const string Name = "HMRC Policy";
-
     private readonly ILogger _logger;
 
+    public HmrcExecutionPolicy(ILogger<HmrcExecutionPolicy> logger)
+    {
+        _logger = logger;
+        TimeSpan retryWaitTime = new(0, 0, 0, 10);
+        Initialize(retryWaitTime);
+    }
+    
     public HmrcExecutionPolicy(ILogger<HmrcExecutionPolicy> logger, TimeSpan retryWaitTime)
     {
         _logger = logger;
-
-        var tooManyRequestsPolicy = Policy.Handle<HttpRequestException>(ex => ex.StatusCode.Equals(429)).WaitAndRetryForeverAsync(i => retryWaitTime, (ex, ts) => OnRetryableFailure(ex));
-        var requestTimeoutPolicy = Policy.Handle<HttpRequestException>(ex => ex.StatusCode.Equals(408)).WaitAndRetryForeverAsync(i => retryWaitTime, (ex, ts) => OnRetryableFailure(ex));
-        var serviceUnavailablePolicy = CreateAsyncRetryPolicy<HttpRequestException>(ex => ex.StatusCode.Equals(503), 5, retryWaitTime, OnRetryableFailure);
-        var internalServerErrorPolicy = CreateAsyncRetryPolicy<HttpRequestException>(ex => ex.StatusCode.Equals(500), 5, retryWaitTime, OnRetryableFailure);
+        Initialize(retryWaitTime);
+    }
+    
+    private void Initialize(TimeSpan retryWaitTime)
+    {
+        var tooManyRequestsPolicy = Policy.Handle<HttpRequestException>(ex => ex.StatusCode.Equals(HttpStatusCode.TooManyRequests)).WaitAndRetryForeverAsync(i => retryWaitTime, (ex, ts) => OnRetryableFailure(ex));
+        var requestTimeoutPolicy = Policy.Handle<HttpRequestException>(ex => ex.StatusCode.Equals(HttpStatusCode.RequestTimeout)).WaitAndRetryForeverAsync(i => retryWaitTime, (ex, ts) => OnRetryableFailure(ex));
+        var serviceUnavailablePolicy = CreateAsyncRetryPolicy<HttpRequestException>(ex => ex.StatusCode.Equals(HttpStatusCode.ServiceUnavailable), 5, retryWaitTime, OnRetryableFailure);
+        var internalServerErrorPolicy = CreateAsyncRetryPolicy<HttpRequestException>(ex => ex.StatusCode.Equals(HttpStatusCode.InternalServerError), 5, retryWaitTime, OnRetryableFailure);
 
         RootPolicy = Policy.WrapAsync(tooManyRequestsPolicy, serviceUnavailablePolicy, internalServerErrorPolicy, requestTimeoutPolicy);
     }
@@ -28,7 +38,7 @@ public class HmrcExecutionPolicy : ExecutionPolicy
     {
         if (ex is HttpRequestException exception)
         {
-            _logger.LogInformation("ApiHttpException - {Ex}", ex);
+            _logger.LogInformation("HttpRequestException - {Ex}", ex);
 
             switch (exception.StatusCode)
             {
