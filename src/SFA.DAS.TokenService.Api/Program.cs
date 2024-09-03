@@ -24,14 +24,7 @@ builder.Services.AddLogging(loggingBuilder =>
 
 builder.Services.AddActiveDirectoryAuthentication(builder.Configuration);
 
-builder.Services.AddTransient<ISecretRepository, KeyVaultSecretRepositoryMSIAuth>();
-builder.Services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
-builder.Services.AddSingleton<IOAuthTokenService, OAuthTokenService>();
-builder.Services.AddTransient<ExecutionPolicy, HmrcExecutionPolicy>();
-builder.Services.AddSingleton<ITokenRefresher, TokenRefresher>();
-builder.Services.AddSingleton<IHmrcAuthTokenBroker, HmrcAuthTokenBroker>();
-builder.Services.AddSingleton<ITokenRefreshAudit>(new TokenRefreshAudit());
-builder.Services.AddSingleton(new TokenRefresherParameters { TokenRefreshExpirationPercentage = 80 });
+builder.Services.AddApplicationServices();
 
 builder.Services.AddApplicationInsightsTelemetry();
 
