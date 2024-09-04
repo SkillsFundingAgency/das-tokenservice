@@ -24,7 +24,8 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
     private CancellationTokenSource? _cancellationTokenSource;
 
     public HmrcAuthTokenBroker(
-        [RequiredPolicy(HmrcExecutionPolicy.Name)] ExecutionPolicy executionPolicy, 
+        [RequiredPolicy(HmrcExecutionPolicy.Name)]
+        ExecutionPolicy executionPolicy,
         ILogger<HmrcAuthTokenBroker> logger,
         IOAuthTokenService tokenService,
         ISecretRepository secretRepository,
@@ -68,7 +69,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
     private async Task<OAuthAccessToken?> RefreshTokenAsync(OAuthAccessToken existingToken)
     {
         _cachedAccessToken = await GetTokenFromServiceUsingRefreshTokenAsync(existingToken) ?? await GetTokenFromServiceAsync();
-        
+
         return _cachedAccessToken;
     }
 
@@ -77,12 +78,12 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
         try
         {
             _logger.LogDebug("Refreshing token (expired {ExpiresAt})", token.ExpiresAt);
-            
+
             var privilegedAccessToken = await GetPrivilegedAccessToken();
             var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(privilegedAccessToken, token.RefreshToken!));
-           
+
             _logger.LogDebug("Refresh token successful (new expiry {Expiry})", newToken?.ExpiresAt.ToString("yy-MMM-dd ddd HH:mm:ss") ?? "not available - new token is null");
-            
+
             return newToken;
         }
         catch (Exception ex)
@@ -92,45 +93,43 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
         }
     }
 
-    private Task<OAuthAccessToken?> GetTokenFromServiceAsync()
+    private async Task<OAuthAccessToken?> GetTokenFromServiceAsync()
     {
-        return Task.Run(async () =>
+        var attempts = 0;
+
+        OAuthAccessToken? tempToken = null;
+
+        while (tempToken == null)
         {
-            var attempts = 0;
+            _logger.LogDebug("Initial call to get a token: attempt {Attempts}", ++attempts);
 
-            OAuthAccessToken? tempToken = null;
+            var privilegedAccessToken = await GetPrivilegedAccessToken();
             
-            while (tempToken == null)
+            tempToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken));
+
+            if (tempToken != null)
             {
-                _logger.LogDebug("Initial call to get a token: attempt {Attempts}", ++attempts);
-
-                var privilegedAccessToken = await GetPrivilegedAccessToken();
-                tempToken = (await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken)))!;
-
-                if (tempToken != null)
-                {
-                    continue;
-                }
-                
-                _logger.LogWarning("The attempt to get a token from HMRC failed - sleeping {RetryDelay} and trying again", _hmrcAuthTokenBrokerConfig.RetryDelay);
-                await Task.Delay(_hmrcAuthTokenBrokerConfig.RetryDelay);
+                continue;
             }
 
-            _cachedAccessToken = tempToken;
+            _logger.LogWarning("The attempt to get a token from HMRC failed - sleeping {RetryDelay} and trying again", _hmrcAuthTokenBrokerConfig.RetryDelay);
+            await Task.Delay(_hmrcAuthTokenBrokerConfig.RetryDelay);
+        }
 
-            return _cachedAccessToken;
-        });
+        _cachedAccessToken = tempToken;
+
+        return _cachedAccessToken;
     }
 
     private async Task<string> GetPrivilegedAccessToken()
     {
         _logger.LogDebug("Attempting to get privileged access token from service using refresh token");
-        
+
         var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
         var privilegedToken = _totpService.Generate(secret);
-        
+
         _logger.LogDebug("Attempt to get privileged access token successfully");
-        
+
         return privilegedToken;
     }
 

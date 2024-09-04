@@ -55,7 +55,7 @@ public class WhenBackgroundTokenRefreshRequested
             t =>
             {
                 var newToken = AccessTokenBuilder.Create().WithValidState().ExpiresInMSecs(tokenLifetimeMsecs);
-                return Task.FromResult(newToken);
+                return Task.FromResult(newToken)!;
             }, cancellationSource.Token);
 
         try

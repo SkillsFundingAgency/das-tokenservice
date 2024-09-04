@@ -38,12 +38,12 @@ public class HmrcExecutionPolicy : ExecutionPolicy
     {
         if (ex is HttpRequestException httpRequestException)
         {
-            _logger.LogInformation("HttpRequestException - {HttpRequestException}", httpRequestException);
+            _logger.LogInformation("HttpRequestException - {HttpRequestException}", httpRequestException.ToString());
 
             switch (httpRequestException.StatusCode)
             {
                 case HttpStatusCode.NotFound:
-                    _logger.LogInformation("Resource not found - {HttpRequestException}", httpRequestException);
+                    _logger.LogInformation("Resource not found - {HttpRequestException}", httpRequestException.ToString());
                     return default;
             }
         }

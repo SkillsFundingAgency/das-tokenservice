@@ -12,12 +12,10 @@ public abstract class TotpGenerator(TotpGeneratorSettings settings) : OtpGenerat
 
     private string Generate(long timeStep)
     {
-        var time = timeStep.ToString("X");
-        while (time.Length < 16)
-        {
-            time = "0" + time;
-        }
-
+        var time = timeStep
+            .ToString("X")
+            .PadLeft(16, '0');
+        
         var msg = time.HexStringToBytes();
 
         return Generate(msg);
