@@ -37,7 +37,7 @@ jobs:
         restoreSolution: "src/SFA.DAS.TokenService.sln"
 
     - task: VSBuild@1
-      displayName: "Build solution src/SFA.DAS.Events.sln"
+      displayName: "Build solution src/SFA.DAS.TokenService.sln"
       inputs:
         solution: "src/SFA.DAS.TokenService.sln"
         vsVersion: 15.0
