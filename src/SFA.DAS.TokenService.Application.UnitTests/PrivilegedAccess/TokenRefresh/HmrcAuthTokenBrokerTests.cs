@@ -101,7 +101,7 @@ public class HmrcAuthTokenBrokerTestFixtures
         _tokenRefresherMock = new Mock<ITokenRefresher>();
         _hmrcAuthTokenBrokerConfigMock = new Mock<IHmrcAuthTokenBrokerConfig>();
 
-        _accessTokenRequests = new Queue<Func<OAuthAccessToken>>();
+        _accessTokenRequests = new Queue<Func<OAuthAccessToken?>>();
 
         _hmrcAuthTokenBrokerConfigMock.Setup(config => config.RetryDelay).Returns(TimeSpan.Zero);
 
@@ -110,7 +110,7 @@ public class HmrcAuthTokenBrokerTestFixtures
             .Returns(() =>
             {
                 var func = _accessTokenRequests.Dequeue();
-                return Task.FromResult(func());
+                return Task.FromResult(func())!;
             });
     }
 
@@ -119,9 +119,9 @@ public class HmrcAuthTokenBrokerTestFixtures
     private readonly Mock<ITotpService> _totpServiceMock;
     private readonly Mock<ITokenRefresher> _tokenRefresherMock;
     private readonly Mock<IHmrcAuthTokenBrokerConfig> _hmrcAuthTokenBrokerConfigMock;
-    private readonly Queue<Func<OAuthAccessToken>> _accessTokenRequests;
+    private readonly Queue<Func<OAuthAccessToken?>> _accessTokenRequests;
 
-    public HmrcAuthTokenBrokerTestFixtures WithInitialTaskResult(Func<OAuthAccessToken> getter)
+    public HmrcAuthTokenBrokerTestFixtures WithInitialTaskResult(Func<OAuthAccessToken?> getter)
     {
         _accessTokenRequests.Enqueue(getter);
         return this;

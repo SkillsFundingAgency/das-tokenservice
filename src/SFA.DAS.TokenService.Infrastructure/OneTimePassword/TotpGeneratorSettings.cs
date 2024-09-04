@@ -7,7 +7,7 @@ public class TotpGeneratorSettings : OtpGeneratorSettings
 
 public abstract class OtpGeneratorSettings
 {
-    public OtpSharedSecret SharedSecret { get; set; }
+    public OtpSharedSecret? SharedSecret { get; set; }
     public int CodeLength { get; set; } = 8;
 }
 

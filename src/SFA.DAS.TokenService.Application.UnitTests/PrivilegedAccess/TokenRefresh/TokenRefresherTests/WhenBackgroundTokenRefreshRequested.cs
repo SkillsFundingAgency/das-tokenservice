@@ -19,7 +19,7 @@ public class WhenBackgroundTokenRefreshRequested
 
         for (var index = 1; index < auditItems.Count; index++)
         {
-            auditItems[index].ActualRefreshStart.Value.Should().BeAfter(auditItems[index-1].ActualRefreshEnd.Value);
+            auditItems[index].ActualRefreshStart!.Value.Should().BeAfter(auditItems[index-1].ActualRefreshEnd!.Value);
         }
     }
 
@@ -88,7 +88,6 @@ public class WhenBackgroundTokenRefreshRequested
         return result;
     }
 }
-
 
 public static class AccessTokenBuilder
 {

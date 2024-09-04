@@ -14,7 +14,7 @@ namespace SFA.DAS.TokenService.Api.UnitTests.Controllers.PrivilegedAccessControl
 public class WhenGettingPrivilegedAccessToken
 {
     private const string AccessCode = "ACCESS-TOKEN";
-    private readonly DateTime ExpiresAt = new DateTime(2017, 2, 22, 13, 45, 26);
+    private readonly DateTime _expiresAt = new(2017, 2, 22, 13, 45, 26);
 
     private Mock<IMediator> _mediator;
     private PrivilegedAccessController _controller;
@@ -28,7 +28,7 @@ public class WhenGettingPrivilegedAccessToken
             .ReturnsAsync(new OAuthAccessToken
             {
                 AccessToken = AccessCode,
-                ExpiresAt = ExpiresAt
+                ExpiresAt = _expiresAt
             });
 
         _logger = new Mock<ILogger>();
@@ -47,7 +47,7 @@ public class WhenGettingPrivilegedAccessToken
 
         // Assert
         actual.Should().NotBeNull();
-        var model = actual.Value as PrivilegedAccessToken;
+        var model = actual!.Value as PrivilegedAccessToken;
         model.Should().NotBeNull();
     }
 
@@ -58,8 +58,8 @@ public class WhenGettingPrivilegedAccessToken
         var actual = await _controller.GetPrivilegedAccessToken() as OkObjectResult;
 
         // Assert
-        var model = actual.Value as PrivilegedAccessToken;
-        model.AccessCode.Should().Be(AccessCode);
+        var model = actual!.Value as PrivilegedAccessToken;
+        model!.AccessCode.Should().Be(AccessCode);
     }
 
     [Test]
@@ -69,8 +69,8 @@ public class WhenGettingPrivilegedAccessToken
         var actual = await _controller.GetPrivilegedAccessToken() as OkObjectResult;
 
         // Assert
-        var model = actual.Value as PrivilegedAccessToken;
-        model.ExpiryTime.Should().Be(ExpiresAt);
+        var model = actual!.Value as PrivilegedAccessToken;
+        model!.ExpiryTime.Should().Be(_expiresAt);
     }
 
     [Test]
@@ -85,6 +85,6 @@ public class WhenGettingPrivilegedAccessToken
 
         // Assert
         actual.Should().NotBeNull();
-        actual.StatusCode.Should().Be(500);
+        actual!.StatusCode.Should().Be(500);
     }
 }

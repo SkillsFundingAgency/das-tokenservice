@@ -27,6 +27,6 @@ public abstract class OtpGenerator(OtpGeneratorSettings settings)
         return result;
     }
 
-    protected abstract byte[] ConvertSecretToHashKey(OtpSharedSecret sharedSecret);
+    protected abstract byte[] ConvertSecretToHashKey(OtpSharedSecret? sharedSecret);
     protected abstract byte[] ComputeHash(byte[] k, byte[] msg);
 }

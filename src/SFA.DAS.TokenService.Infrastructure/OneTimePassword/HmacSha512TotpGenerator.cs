@@ -4,7 +4,7 @@ namespace SFA.DAS.TokenService.Infrastructure.OneTimePassword;
 
 public class HmacSha512TotpGenerator(TotpGeneratorSettings settings) : TotpGenerator(settings)
 {
-    protected override byte[] ConvertSecretToHashKey(OtpSharedSecret sharedSecret)
+    protected override byte[] ConvertSecretToHashKey(OtpSharedSecret? sharedSecret)
     {
         return sharedSecret.GetKeyOfLength(64);
     }

@@ -16,7 +16,7 @@ public class TotpService : ITotpService
 
     private class UnpaddedHmacSha512TotpGenerator(TotpGeneratorSettings settings) : HmacSha512TotpGenerator(settings)
     {
-        protected override byte[] ConvertSecretToHashKey(OtpSharedSecret sharedSecret)
+        protected override byte[] ConvertSecretToHashKey(OtpSharedSecret? sharedSecret)
         {
             return sharedSecret.Data;
         }
