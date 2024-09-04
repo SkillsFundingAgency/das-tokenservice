@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace SFA.DAS.TokenService.Infrastructure.OneTimePassword;
 
 public abstract class OtpGenerator(OtpGeneratorSettings settings)
@@ -20,10 +22,12 @@ public abstract class OtpGenerator(OtpGeneratorSettings settings)
         var otp = binary % (int)Math.Pow(10, settings.CodeLength);
 
         var result = otp.ToString();
+        
         while (result.Length < settings.CodeLength)
         {
             result = "0" + result;
         }
+        
         return result;
     }
 

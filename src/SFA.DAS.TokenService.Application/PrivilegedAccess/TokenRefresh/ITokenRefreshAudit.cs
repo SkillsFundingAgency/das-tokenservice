@@ -13,7 +13,7 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 /// </remarks>
 public interface ITokenRefreshAudit
 {
-    TokenRefreshAuditEntry CreateAuditEntry(OAuthAccessToken token);
+    TokenRefreshAuditEntry CreateAuditEntry(OAuthAccessToken? token);
     void RefreshStarted(TokenRefreshAuditEntry auditEntry);
     void RefreshEnded(TokenRefreshAuditEntry auditEntry);
     IEnumerable<TokenRefreshAuditEntry> AuditItems { get; }

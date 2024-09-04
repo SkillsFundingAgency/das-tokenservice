@@ -51,12 +51,12 @@ public class WhenBackgroundTokenRefreshRequested
         var token = AccessTokenBuilder.Create().WithValidState().ExpiresInMSecs(tokenLifetimeMsecs);
 
         // Act
-        var refreshTask = refresher.StartTokenBackgroundRefreshAsync(token, cancellationSource.Token,
+        var refreshTask = refresher.StartTokenBackgroundRefreshAsync(token,
             t =>
             {
                 var newToken = AccessTokenBuilder.Create().WithValidState().ExpiresInMSecs(tokenLifetimeMsecs);
                 return Task.FromResult(newToken);
-            });
+            }, cancellationSource.Token);
 
         try
         {
@@ -107,7 +107,7 @@ public static class AccessTokenBuilder
         return token;
     }
 
-    public static OAuthAccessToken ExpiresInMSecs(this OAuthAccessToken token, int msecs)
+    public static OAuthAccessToken? ExpiresInMSecs(this OAuthAccessToken? token, int msecs)
     {
         token.ExpiresAt = DateTime.UtcNow.AddMilliseconds(msecs);
         return token;

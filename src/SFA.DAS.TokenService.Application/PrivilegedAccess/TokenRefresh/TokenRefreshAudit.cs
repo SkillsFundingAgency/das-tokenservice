@@ -17,7 +17,7 @@ public class TokenRefreshAudit : ITokenRefreshAudit
         }
     }
 
-    public TokenRefreshAuditEntry CreateAuditEntry(OAuthAccessToken token)
+    public TokenRefreshAuditEntry CreateAuditEntry(OAuthAccessToken? token)
     {
         var result = new TokenRefreshAuditEntry
         {

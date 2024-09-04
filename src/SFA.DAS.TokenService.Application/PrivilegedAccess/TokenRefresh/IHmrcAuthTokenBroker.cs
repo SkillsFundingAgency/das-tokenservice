@@ -18,5 +18,5 @@ public interface IHmrcAuthTokenBroker
     ///     in async/await scenarios. 
     /// </remarks>
     /// <returns></returns>
-    Task<OAuthAccessToken> GetTokenAsync();
+    Task<OAuthAccessToken?> GetTokenAsync();
 }

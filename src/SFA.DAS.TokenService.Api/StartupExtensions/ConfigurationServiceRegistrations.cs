@@ -12,10 +12,10 @@ public static class ConfigurationServiceRegistrations
         services.AddOptions();
         
         services.Configure<KeyVaultConfiguration>(configuration);
-        services.AddSingleton(cfg => cfg.GetService<IOptions<KeyVaultConfiguration>>()?.Value);
+        services.AddSingleton(cfg => cfg.GetService<IOptions<KeyVaultConfiguration>>()!.Value);
 
         services.Configure<OAuthTokenServiceConfiguration>(configuration);
-        services.AddSingleton(cfg => cfg.GetService<IOptions<OAuthTokenServiceConfiguration>>()?.Value);
+        services.AddSingleton(cfg => cfg.GetService<IOptions<OAuthTokenServiceConfiguration>>()!.Value);
 
         services.AddSingleton(configuration);
         

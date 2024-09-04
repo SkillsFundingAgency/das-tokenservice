@@ -32,7 +32,7 @@ public class OAuthTokenService : IOAuthTokenService
         
         return new OAuthAccessToken
         {
-            AccessToken = hmrcToken.AccessToken,
+            AccessToken = hmrcToken!.AccessToken,
             RefreshToken = hmrcToken.RefreshToken,
             ExpiresAt = DateTime.UtcNow.AddSeconds(hmrcToken.ExpiresIn),
             Scope = hmrcToken.Scope,
@@ -55,7 +55,7 @@ public class OAuthTokenService : IOAuthTokenService
         
         return new OAuthAccessToken
         {
-            AccessToken = hmrcToken.AccessToken,
+            AccessToken = hmrcToken!.AccessToken,
             RefreshToken = hmrcToken.RefreshToken,
             ExpiresAt = DateTime.UtcNow.AddSeconds(hmrcToken.ExpiresIn),
             Scope = hmrcToken.Scope,

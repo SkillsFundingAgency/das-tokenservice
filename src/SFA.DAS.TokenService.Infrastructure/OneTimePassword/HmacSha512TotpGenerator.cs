@@ -6,7 +6,7 @@ public class HmacSha512TotpGenerator(TotpGeneratorSettings settings) : TotpGener
 {
     protected override byte[] ConvertSecretToHashKey(OtpSharedSecret? sharedSecret)
     {
-        return sharedSecret.GetKeyOfLength(64);
+        return sharedSecret!.GetKeyOfLength(64);
     }
 
     protected override byte[] ComputeHash(byte[] k, byte[] msg)

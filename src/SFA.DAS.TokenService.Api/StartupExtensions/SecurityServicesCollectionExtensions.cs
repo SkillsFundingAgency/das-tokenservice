@@ -24,7 +24,7 @@ public static class SecurityServicesCollectionExtensions
             auth.Authority = $"https://login.microsoftonline.com/{configuration["Tenant"]}";
             auth.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
             {
-                ValidAudiences = configuration["idaAudience"].Split(','),
+                ValidAudiences = configuration["idaAudience"]!.Split(','),
             };
         });
     }

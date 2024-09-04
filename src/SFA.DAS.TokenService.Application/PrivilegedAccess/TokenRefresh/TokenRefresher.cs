@@ -2,23 +2,14 @@
 
 namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 
-public class TokenRefresher : ITokenRefresher
+public class TokenRefresher(
+    ITokenRefreshAudit refreshAudit,
+    TokenRefresherParameters parameters)
+    : ITokenRefresher
 {
-    private readonly TokenRefresherParameters _parameters;
-    private readonly ITokenRefreshAudit _refreshAudit;
-
-    public TokenRefresher(
-        ITokenRefreshAudit refreshAudit,
-        TokenRefresherParameters parameters)
-    {
-        _parameters = parameters;
-        _refreshAudit = refreshAudit;
-    }
-
-    public Task StartTokenBackgroundRefreshAsync(
-        OAuthAccessToken token, 
-        CancellationToken cancellationToken, 
-        Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken)
+    public Task StartTokenBackgroundRefreshAsync(OAuthAccessToken? token,
+        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken,
+        CancellationToken cancellationToken)
     {
         return Task.Run(async () =>
         {
@@ -29,39 +20,40 @@ public class TokenRefresher : ITokenRefresher
         }, cancellationToken);
     }
 
-    private async Task<OAuthAccessToken> WaitAndThenRefreshAsync(
-        OAuthAccessToken token,
-        CancellationToken cancellationToken, 
-        Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken)
+    private async Task<OAuthAccessToken?> WaitAndThenRefreshAsync(
+        OAuthAccessToken? token,
+        CancellationToken cancellationToken,
+        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken)
     {
-        var auditItem = _refreshAudit.CreateAuditEntry(token);
+        var auditItem = refreshAudit.CreateAuditEntry(token);
 
-        await WaitForRefreshTimeAsync(token, cancellationToken, auditItem);
+        await WaitForRefreshTimeAsync(token, auditItem, cancellationToken);
 
-        if (!cancellationToken.IsCancellationRequested)
+        if (cancellationToken.IsCancellationRequested)
         {
-            _refreshAudit.RefreshStarted(auditItem);
-
-            OAuthAccessToken newToken = await TryRefreshUntilCancelledOrSuccess(
-                auditItem, 
-                token, 
-                cancellationToken, 
-                refreshToken);
-
-            _refreshAudit.RefreshEnded(auditItem);
-            return newToken;
+            return null;
         }
 
-        return null;
+        refreshAudit.RefreshStarted(auditItem);
+
+        var newToken = await TryRefreshUntilCancelledOrSuccess(
+            auditItem,
+            token,
+            cancellationToken,
+            refreshToken);
+
+        refreshAudit.RefreshEnded(auditItem);
+
+        return newToken;
     }
 
-    private async Task<OAuthAccessToken> TryRefreshUntilCancelledOrSuccess(
+    private async Task<OAuthAccessToken?> TryRefreshUntilCancelledOrSuccess(
         TokenRefreshAuditEntry auditItem,
-        OAuthAccessToken token,
+        OAuthAccessToken? token,
         CancellationToken cancellationToken,
-        Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken)
+        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken)
     {
-        OAuthAccessToken newToken;
+        OAuthAccessToken? newToken;
 
         do
         {
@@ -69,41 +61,35 @@ public class TokenRefresher : ITokenRefresher
             newToken = await TryRefresh(token, refreshToken);
             if (newToken == null)
             {
-                await Task.Delay(_parameters.RetryInterval, cancellationToken);
+                await Task.Delay(parameters.RetryInterval, cancellationToken);
             }
         } while (newToken == null && !cancellationToken.IsCancellationRequested);
 
         return newToken;
     }
 
-    private Task<OAuthAccessToken> TryRefresh(
-        OAuthAccessToken token,
-        Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken)
+    private static Task<OAuthAccessToken?> TryRefresh(
+        OAuthAccessToken? token,
+        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken)
     {
         try
         {
-            return refreshToken(token);
+            return refreshToken(token!);
         }
         catch (Exception)
         {
             // we need to keep trying
-            return Task.FromResult<OAuthAccessToken>(null);
+            return Task.FromResult<OAuthAccessToken?>(null);
         }
     }
 
-    //TODO: not using 4.6.2 so Task.Completed not available
-    private readonly Task _completedTask = Task.Run(() => {});
+    private readonly Task _completedTask = Task.CompletedTask;
 
-    private Task WaitForRefreshTimeAsync(OAuthAccessToken token, CancellationToken cancellationToken, TokenRefreshAuditEntry auditItem)
+    private Task WaitForRefreshTimeAsync(OAuthAccessToken? token, TokenRefreshAuditEntry auditItem, CancellationToken cancellationToken)
     {
-        var delay = DateTime.UtcNow.GetPercentageTowards(token.ExpiresAt, _parameters.TokenRefreshExpirationPercentage);
+        var delay = DateTime.UtcNow.GetPercentageTowards(token!.ExpiresAt, parameters.TokenRefreshExpirationPercentage);
         auditItem.PlannedRefreshDelay = delay;
 
-        if (delay == TimeSpan.Zero)
-        {
-            return _completedTask;
-        }
-
-        return Task.Delay(delay, cancellationToken);
+        return delay == TimeSpan.Zero ? _completedTask : Task.Delay(delay, cancellationToken);
     }
 }

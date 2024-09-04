@@ -18,10 +18,10 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
     private readonly ITokenRefresher _tokenRefresher;
     private readonly IHmrcAuthTokenBrokerConfig _hmrcAuthTokenBrokerConfig;
 
-    private readonly Task<OAuthAccessToken> _initialiseTask;
-    private OAuthAccessToken _cachedAccessToken;
+    private readonly Task<OAuthAccessToken?> _initialiseTask;
+    private OAuthAccessToken? _cachedAccessToken;
 
-    private CancellationTokenSource _cancellationTokenSource;
+    private CancellationTokenSource? _cancellationTokenSource;
 
     public HmrcAuthTokenBroker(
         [RequiredPolicy(HmrcExecutionPolicy.Name)] ExecutionPolicy executionPolicy, 
@@ -42,13 +42,13 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
         _initialiseTask = InitialiseToken();
     }
 
-    public async Task<OAuthAccessToken> GetTokenAsync()
+    public async Task<OAuthAccessToken?> GetTokenAsync()
     {
         await _initialiseTask;
         return _cachedAccessToken;
     }
 
-    private Task<OAuthAccessToken> InitialiseToken()
+    private Task<OAuthAccessToken?> InitialiseToken()
     {
         return GetTokenFromServiceAsync()
             .ContinueWith(task =>
@@ -58,21 +58,17 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
             });
     }
 
-    private void StartTokenBackgroundRefresh(OAuthAccessToken token)
+    private void StartTokenBackgroundRefresh(OAuthAccessToken? token)
     {
         DisposeCancellationToken();
         _cancellationTokenSource = new CancellationTokenSource();
-        _tokenRefresher.StartTokenBackgroundRefreshAsync(token, _cancellationTokenSource.Token, RefreshTokenAsync);
+        _tokenRefresher.StartTokenBackgroundRefreshAsync(token, RefreshTokenAsync, _cancellationTokenSource.Token);
     }
 
-    private async Task<OAuthAccessToken> RefreshTokenAsync(OAuthAccessToken existingToken)
+    private async Task<OAuthAccessToken?> RefreshTokenAsync(OAuthAccessToken existingToken)
     {
-        var tempToken = await GetTokenFromServiceUsingRefreshTokenAsync(existingToken) ?? await GetTokenFromServiceAsync();
-        if (tempToken != null)
-        {
-            _cachedAccessToken = tempToken;
-        } 
-
+        _cachedAccessToken = await GetTokenFromServiceUsingRefreshTokenAsync(existingToken) ?? await GetTokenFromServiceAsync();
+        
         return _cachedAccessToken;
     }
 
@@ -96,20 +92,20 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
         }
     }
 
-    private Task<OAuthAccessToken> GetTokenFromServiceAsync()
+    private Task<OAuthAccessToken?> GetTokenFromServiceAsync()
     {
         return Task.Run(async () =>
         {
             var attempts = 0;
 
-            OAuthAccessToken tempToken = null;
+            OAuthAccessToken? tempToken = null;
             
             while (tempToken == null)
             {
                 _logger.LogDebug("Initial call to get a token: attempt {Attempts}", ++attempts);
 
                 var privilegedAccessToken = await GetPrivilegedAccessToken();
-                tempToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken));
+                tempToken = (await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken)))!;
 
                 if (tempToken == null)
                 {
@@ -143,12 +139,8 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
 
     private void DisposeCancellationToken()
     {
-        if (_cancellationTokenSource != null)
-        {
-            _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
-        }
-
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
         _cancellationTokenSource = null;
     }
 }

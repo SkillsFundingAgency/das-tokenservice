@@ -5,13 +5,13 @@ namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 
 public abstract class ExecutionPolicy
 {
-    protected AsyncPolicyWrap  RootPolicy { get; set; }
+    protected AsyncPolicyWrap?  RootPolicy { get; set; }
     
     public virtual async Task<T?> ExecuteAsync<T>(Func<Task<T>> func)
     {
         try
         {
-            return await RootPolicy.ExecuteAsync(func);
+            return await RootPolicy!.ExecuteAsync(func);
         }
         catch (Exception ex)
         {

@@ -17,19 +17,18 @@ public interface ITokenRefresher
     ///     Starts a background task that will run indefinitely refreshing the supplied token.
     /// </summary>
     /// <param name="token">The original token</param>
-    /// <param name="cancellationToken">
-    ///     A cancellation token provided by the caller. This should be cancelled when the caller is closing 
-    ///     down.
-    /// </param>
     /// <param name="refreshToken">
     ///     A delegate that will be called to refresh the token when the existing token is getting towards
     ///     the end of its life.
     /// </param>
+    /// <param name="cancellationToken">
+    ///     A cancellation token provided by the caller. This should be cancelled when the caller is closing 
+    ///     down.
+    /// </param>
     /// <returns>
     ///     The background task. This should probably not be awaited as it will run for a long time.
     /// </returns>
-    Task StartTokenBackgroundRefreshAsync(
-        OAuthAccessToken token, 
-        CancellationToken cancellationToken,
-        Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken);
+    Task StartTokenBackgroundRefreshAsync(OAuthAccessToken? token,
+        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken,
+        CancellationToken cancellationToken);
 }

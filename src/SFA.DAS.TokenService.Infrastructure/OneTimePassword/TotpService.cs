@@ -14,7 +14,7 @@ public class TotpService : ITotpService
         return generator.Generate(DateTime.UtcNow);
     }
 
-    private class UnpaddedHmacSha512TotpGenerator(TotpGeneratorSettings settings) : HmacSha512TotpGenerator(settings)
+    private sealed class UnpaddedHmacSha512TotpGenerator(TotpGeneratorSettings settings) : HmacSha512TotpGenerator(settings)
     {
         protected override byte[] ConvertSecretToHashKey(OtpSharedSecret? sharedSecret)
         {

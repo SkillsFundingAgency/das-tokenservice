@@ -6,5 +6,5 @@ public interface IHttpClientWrapper
 {
     List<MediaTypeWithQualityHeaderValue> AcceptHeaders { get; set; }
 
-    Task<T?> Post<T>(string url, object content);
+    Task<T?> Post<T>(string? url, object content);
 }

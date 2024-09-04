@@ -41,7 +41,7 @@ public class WhenGettingPrivilegedAccessToken
 
         // Assert
         actual.Should().NotBeNull();
-        actual.AccessCode.Should().Be(AccessCode);
+        actual!.AccessCode.Should().Be(AccessCode);
         actual.ExpiryTime.Should().Be(_expiryTime);
     }
 }

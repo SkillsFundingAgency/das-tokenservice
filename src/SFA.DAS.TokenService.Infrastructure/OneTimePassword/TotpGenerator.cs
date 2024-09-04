@@ -2,7 +2,7 @@ namespace SFA.DAS.TokenService.Infrastructure.OneTimePassword;
 
 public abstract class TotpGenerator(TotpGeneratorSettings settings) : OtpGenerator(settings)
 {
-    private readonly DateTime _epoch = new(1970, 1, 1);
+    private readonly DateTime _epoch = DateTime.UnixEpoch;
 
     public string Generate(DateTime time)
     {

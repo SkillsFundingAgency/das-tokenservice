@@ -1,12 +1,12 @@
 namespace SFA.DAS.TokenService.Infrastructure.OneTimePassword;
 
-internal sealed class Base32
+internal static class Base32
 {
     public static byte[] ToBytes(string input)
     {
         if (string.IsNullOrEmpty(input))
         {
-            throw new ArgumentNullException("input");
+            throw new ArgumentNullException(nameof(input));
         }
 
         input = input.TrimEnd('='); //remove padding characters

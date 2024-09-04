@@ -8,7 +8,7 @@ public class HttpClientWrapper : IHttpClientWrapper
 {
     public List<MediaTypeWithQualityHeaderValue> AcceptHeaders { get; set; } = [];
 
-    public async Task<T?> Post<T>(string url, object content)
+    public async Task<T?> Post<T>(string? url, object content)
     {
         using var client = CreateClient();
         var jsonContent = JsonConvert.SerializeObject(content);

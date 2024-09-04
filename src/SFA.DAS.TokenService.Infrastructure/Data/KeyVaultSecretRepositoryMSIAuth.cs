@@ -12,7 +12,7 @@ public class KeyVaultSecretRepositoryMSIAuth(KeyVaultConfiguration configuration
     {
         logger.LogDebug("Getting secret {Name} from KeyVault using Managed Service Identity", name);
        
-        var vaultUri = new Uri(configuration.VaultUri);
+        var vaultUri = new Uri(configuration.VaultUri ?? throw new InvalidOperationException("KeyVault Uri is null"));
         var client = new SecretClient(vaultUri, new DefaultAzureCredential());
         var response = await client.GetSecretAsync(configuration.VaultUri, name);
 
