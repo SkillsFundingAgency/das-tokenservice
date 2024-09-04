@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Options;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
 
 namespace SFA.DAS.TokenService.Api.StartupExtensions;
 
+[ExcludeFromCodeCoverage]
 public static class ConfigurationServiceRegistrations
 {
     public static IServiceCollection AddConfigurationOptions(this IServiceCollection services, IConfiguration configuration)

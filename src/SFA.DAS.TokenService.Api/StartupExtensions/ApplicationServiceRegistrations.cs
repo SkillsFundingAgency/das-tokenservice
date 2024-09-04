@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 using SFA.DAS.TokenService.Domain.Data;
 using SFA.DAS.TokenService.Domain.Services;
@@ -9,6 +10,7 @@ using SFA.DAS.TokenService.Infrastructure.Services;
 
 namespace SFA.DAS.TokenService.Api.StartupExtensions;
 
+[ExcludeFromCodeCoverage]
 public static class ApplicationServiceRegistrations
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)

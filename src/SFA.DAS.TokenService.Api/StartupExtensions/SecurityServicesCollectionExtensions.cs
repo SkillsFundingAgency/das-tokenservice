@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace SFA.DAS.TokenService.Api.StartupExtensions;
 
+[ExcludeFromCodeCoverage]
 public static class SecurityServicesCollectionExtensions
 {
     public static void AddActiveDirectoryAuthentication(this IServiceCollection services, IConfiguration configuration)
