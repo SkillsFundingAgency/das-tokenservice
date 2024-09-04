@@ -6,8 +6,8 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessT
 
 public class PrivilegedAccessQueryHandler(IHmrcAuthTokenBroker hmrcAuthTokenBroker) : IRequestHandler<PrivilegedAccessQuery, OAuthAccessToken>
 {
-    public async Task<OAuthAccessToken?> Handle(PrivilegedAccessQuery request, CancellationToken cancellationToken)
+    public async Task<OAuthAccessToken> Handle(PrivilegedAccessQuery request, CancellationToken cancellationToken)
     {
-        return await hmrcAuthTokenBroker.GetTokenAsync();
+        return (await hmrcAuthTokenBroker.GetTokenAsync())!;
     }
 }

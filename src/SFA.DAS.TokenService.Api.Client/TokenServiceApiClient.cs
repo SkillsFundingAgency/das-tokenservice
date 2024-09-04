@@ -3,25 +3,16 @@ using SFA.DAS.TokenService.Api.Types;
 
 namespace SFA.DAS.TokenService.Api.Client;
 
-public class TokenServiceApiClient : ITokenServiceApiClient
+public class TokenServiceApiClient(ITokenServiceApiClientConfiguration configuration, ISecureHttpClient httpClient) : ITokenServiceApiClient
 {
-    private readonly ITokenServiceApiClientConfiguration _configuration;
-    private readonly ISecureHttpClient _httpClient;
-
     public TokenServiceApiClient(ITokenServiceApiClientConfiguration configuration) : this(configuration, new SecureHttpClient(configuration))
     {
-    }
-    
-    public TokenServiceApiClient(ITokenServiceApiClientConfiguration configuration, ISecureHttpClient httpClient)
-    {
-        _configuration = configuration;
-        _httpClient = httpClient;
     }
 
     public async Task<PrivilegedAccessToken?> GetPrivilegedAccessTokenAsync()
     {
-        var absoluteUri = new Uri(new Uri(_configuration.ApiBaseUrl), "api/PrivilegedAccess");
-        var json = await _httpClient.GetAsync(absoluteUri.ToString());
+        var absoluteUri = new Uri(new Uri(configuration.ApiBaseUrl!), "api/PrivilegedAccess");
+        var json = await httpClient.GetAsync(absoluteUri.ToString());
         
         return JsonConvert.DeserializeObject<PrivilegedAccessToken>(json);
     }

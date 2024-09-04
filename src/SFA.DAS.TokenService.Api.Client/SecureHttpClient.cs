@@ -10,9 +10,9 @@ internal class SecureHttpClient(ITokenServiceApiClientConfiguration configuratio
 
     public async Task<string> GetAsync(string url)
     {
-        var accessToken = IsClientCredentialConfiguration(configuration.ClientId, configuration.ClientSecret, configuration.Tenant)
-            ? await GetClientCredentialAuthenticationResult(configuration.ClientId, configuration.ClientSecret, configuration.IdentifierUri, configuration.Tenant)
-            : await GetManagedIdentityAuthenticationResult(configuration.IdentifierUri);
+        var accessToken = IsClientCredentialConfiguration(configuration.ClientId!, configuration.ClientSecret!, configuration.Tenant!)
+            ? await GetClientCredentialAuthenticationResult(configuration.ClientId!, configuration.ClientSecret!, configuration.IdentifierUri!, configuration.Tenant!)
+            : await GetManagedIdentityAuthenticationResult(configuration.IdentifierUri!);
 
         using var client = new HttpClient();
         

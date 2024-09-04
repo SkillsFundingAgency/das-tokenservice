@@ -79,7 +79,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
             _logger.LogDebug("Refreshing token (expired {ExpiresAt})", token.ExpiresAt);
             
             var privilegedAccessToken = await GetPrivilegedAccessToken();
-            var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(privilegedAccessToken, token.RefreshToken));
+            var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(privilegedAccessToken, token.RefreshToken!));
            
             _logger.LogDebug("Refresh token successful (new expiry {Expiry})", newToken?.ExpiresAt.ToString("yy-MMM-dd ddd HH:mm:ss") ?? "not available - new token is null");
             
@@ -107,11 +107,13 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
                 var privilegedAccessToken = await GetPrivilegedAccessToken();
                 tempToken = (await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken)))!;
 
-                if (tempToken == null)
+                if (tempToken != null)
                 {
-                    _logger.LogWarning("The attempt to get a token from HMRC failed - sleeping {RetryDelay} and trying again", _hmrcAuthTokenBrokerConfig.RetryDelay);
-                    await Task.Delay(_hmrcAuthTokenBrokerConfig.RetryDelay);
+                    continue;
                 }
+                
+                _logger.LogWarning("The attempt to get a token from HMRC failed - sleeping {RetryDelay} and trying again", _hmrcAuthTokenBrokerConfig.RetryDelay);
+                await Task.Delay(_hmrcAuthTokenBrokerConfig.RetryDelay);
             }
 
             _cachedAccessToken = tempToken;

@@ -4,13 +4,14 @@ namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 
 public class TokenRefreshAudit : ITokenRefreshAudit
 {
-    private readonly List<TokenRefreshAuditEntry> _auditEntries;
+    private readonly List<TokenRefreshAuditEntry> _auditEntries = [];
 
     private readonly bool _maintainList;
 
     public TokenRefreshAudit(bool maintainList = false)
     {
         _maintainList = maintainList;
+        
         if (maintainList)
         {
             _auditEntries = [];
@@ -21,7 +22,7 @@ public class TokenRefreshAudit : ITokenRefreshAudit
     {
         var result = new TokenRefreshAuditEntry
         {
-            ExpirationTime = token.ExpiresAt
+            ExpirationTime = token!.ExpiresAt
         };
 
         if (_maintainList)

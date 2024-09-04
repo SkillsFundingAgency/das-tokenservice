@@ -22,13 +22,9 @@ public class WhenHandlingPrivilegedAccessQuery
     private const string TokenType = "TOKEN-TYPE";
     
     private const string CachedRefreshToken = "CACHED-REFRESH-TOKEN";
-    private readonly DateTime CachedExpiresAt = DateTime.Now.AddHours(1);
-    private const string CachedScope = "CACHED-SCOPE";
-    private const string CachedTokenType = "CACHED-TOKEN-TYPE";
-    private const string CacheKey = "OGD-TOKEN";
     private const string RefreshedAccessToken = "REFRESHED-ACCESS-TOKEN";
     private const string RefreshedRefreshToken = "REFRESHED-REFRESH-TOKEN";
-    private readonly DateTime RefreshedExpiresAt = DateTime.Now.AddHours(3);
+    private readonly DateTime _refreshedExpiresAt = DateTime.Now.AddHours(3);
     private const string RefreshedScope = "REFRESHED-SCOPE";
     private const string RefreshedTokenType = "REFRESHED-TOKEN-TYPE";
 
@@ -70,7 +66,7 @@ public class WhenHandlingPrivilegedAccessQuery
             {
                 AccessToken = RefreshedAccessToken,
                 RefreshToken = RefreshedRefreshToken,
-                ExpiresAt = RefreshedExpiresAt,
+                ExpiresAt = _refreshedExpiresAt,
                 Scope = RefreshedScope,
                 TokenType = RefreshedTokenType
             });
@@ -131,8 +127,8 @@ public class WhenHandlingPrivilegedAccessQuery
         var actual = await _handler.Handle(_query, CancellationToken.None);
 
         // Assert
-        actual.Should().NotBeNull();
-        actual.AccessToken.Should().Be(AccessToken);
+        actual!.Should().NotBeNull();
+        actual!.AccessToken.Should().Be(AccessToken);
         actual.RefreshToken.Should().Be(RefreshToken);
         actual.ExpiresAt.Should().Be(ExpiresAt);
         actual.Scope.Should().Be(Scope);

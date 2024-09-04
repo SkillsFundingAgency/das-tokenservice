@@ -15,7 +15,7 @@ public static class ApplicationServiceRegistrations
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services.AddTransient<ISecretRepository, KeyVaultSecretRepositoryMSIAuth>();
+        services.AddTransient<ISecretRepository, KeyVaultSecretRepository>();
         services.AddTransient<IHmrcAuthTokenBrokerConfig, HmrcAuthTokenBrokerConfig>();
         services.AddSingleton<IHttpClientWrapper, HttpClientWrapper>();
         services.AddSingleton<IOAuthTokenService, OAuthTokenService>();

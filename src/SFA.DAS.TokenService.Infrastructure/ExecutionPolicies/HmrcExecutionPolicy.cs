@@ -36,14 +36,14 @@ public class HmrcExecutionPolicy : ExecutionPolicy
 
     protected override T? OnException<T>(Exception ex) where T : default
     {
-        if (ex is HttpRequestException exception)
+        if (ex is HttpRequestException httpRequestException)
         {
-            _logger.LogInformation("HttpRequestException - {Ex}", ex);
+            _logger.LogInformation("HttpRequestException - {HttpRequestException}", httpRequestException);
 
-            switch (exception.StatusCode)
+            switch (httpRequestException.StatusCode)
             {
                 case HttpStatusCode.NotFound:
-                    _logger.LogInformation("Resource not found - {Ex}", ex);
+                    _logger.LogInformation("Resource not found - {HttpRequestException}", httpRequestException);
                     return default;
             }
         }

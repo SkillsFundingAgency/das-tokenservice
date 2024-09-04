@@ -51,7 +51,7 @@ public class HmrcAuthTokenBrokerTests
 
         var svc = fixtures.CreateHmrcAuthTokenBroker();
 
-        var accessToken = await svc.GetTokenAsync();
+        await svc.GetTokenAsync();
 
         fixtures.OAuthTokenServiceMock.Verify(ots => ots.GetAccessToken(It.IsAny<string>()), Times.Exactly(4));
     }
@@ -64,7 +64,7 @@ public class HmrcAuthTokenBrokerTests
 
         var svc = fixtures.CreateHmrcAuthTokenBroker();
 
-        var accessToken = await svc.GetTokenAsync();
+        await svc.GetTokenAsync();
 
         fixtures.OAuthTokenServiceMock.Verify(ots => ots.GetAccessToken(It.IsAny<string>()), Times.Exactly(2));
     }
@@ -86,8 +86,9 @@ public class HmrcAuthTokenBrokerTests
 
         var token = await svc.GetTokenAsync();
 
-        accessToken.Should().Be(token.AccessToken, "Access token is not the expected value");
-        refreshToken.Should().Be(token.RefreshToken, "Refresh token is not the expected value");
+        token.Should().NotBeNull();
+        token!.AccessToken.Should().Be(accessToken, "Access token is not the expected value");
+        token.RefreshToken.Should().Be(refreshToken, "Refresh token is not the expected value");
     }
 }
 

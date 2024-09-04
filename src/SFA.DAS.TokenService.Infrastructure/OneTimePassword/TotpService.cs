@@ -18,7 +18,7 @@ public class TotpService : ITotpService
     {
         protected override byte[] ConvertSecretToHashKey(OtpSharedSecret? sharedSecret)
         {
-            return sharedSecret.Data;
+            return sharedSecret!.Data;
         }
     }
 }

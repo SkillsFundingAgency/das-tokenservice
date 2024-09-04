@@ -15,15 +15,14 @@ public class TokenRefresher(
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                token = await WaitAndThenRefreshAsync(token, cancellationToken, refreshToken);
+                token = await WaitAndThenRefreshAsync(token, refreshToken, cancellationToken);
             }
         }, cancellationToken);
     }
 
-    private async Task<OAuthAccessToken?> WaitAndThenRefreshAsync(
-        OAuthAccessToken? token,
-        CancellationToken cancellationToken,
-        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken)
+    private async Task<OAuthAccessToken?> WaitAndThenRefreshAsync(OAuthAccessToken? token,
+        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken,
+        CancellationToken cancellationToken)
     {
         var auditItem = refreshAudit.CreateAuditEntry(token);
 
@@ -39,19 +38,17 @@ public class TokenRefresher(
         var newToken = await TryRefreshUntilCancelledOrSuccess(
             auditItem,
             token,
-            cancellationToken,
-            refreshToken);
+            refreshToken, cancellationToken);
 
         refreshAudit.RefreshEnded(auditItem);
 
         return newToken;
     }
 
-    private async Task<OAuthAccessToken?> TryRefreshUntilCancelledOrSuccess(
-        TokenRefreshAuditEntry auditItem,
+    private async Task<OAuthAccessToken?> TryRefreshUntilCancelledOrSuccess(TokenRefreshAuditEntry auditItem,
         OAuthAccessToken? token,
-        CancellationToken cancellationToken,
-        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken)
+        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken,
+        CancellationToken cancellationToken)
     {
         OAuthAccessToken? newToken;
 

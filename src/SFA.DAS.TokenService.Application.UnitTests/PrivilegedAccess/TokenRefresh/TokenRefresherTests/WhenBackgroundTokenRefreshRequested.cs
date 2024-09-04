@@ -7,8 +7,8 @@ namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.TokenRefre
 
 public class WhenBackgroundTokenRefreshRequested
 {
-    [TestCase(2000,  100, 80)]
-    [TestCase(2000,  500, 80)]
+    [TestCase(2000, 100, 80)]
+    [TestCase(2000, 500, 80)]
     [TestCase(2000, 1000, 80)]
     public async Task WeShouldNotRunRefreshInParallel(
         int runDurationMsecs,
@@ -19,12 +19,12 @@ public class WhenBackgroundTokenRefreshRequested
 
         for (var index = 1; index < auditItems.Count; index++)
         {
-            auditItems[index].ActualRefreshStart!.Value.Should().BeAfter(auditItems[index-1].ActualRefreshEnd!.Value);
+            auditItems[index].ActualRefreshStart!.Value.Should().BeAfter(auditItems[index - 1].ActualRefreshEnd!.Value);
         }
     }
 
-    [TestCase(2000,  500, 80)]
-    [TestCase(2000,  750, 60)]
+    [TestCase(2000, 500, 80)]
+    [TestCase(2000, 750, 60)]
     [TestCase(2000, 1000, 80)]
     public async Task WeShouldAlwaysHaveAValidToken(
         int runDurationMsecs,
@@ -51,7 +51,7 @@ public class WhenBackgroundTokenRefreshRequested
         var token = AccessTokenBuilder.Create().WithValidState().ExpiresInMSecs(tokenLifetimeMsecs);
 
         // Act
-        var refreshTask = refresher.StartTokenBackgroundRefreshAsync(token,
+        _ = refresher.StartTokenBackgroundRefreshAsync(token,
             t =>
             {
                 var newToken = AccessTokenBuilder.Create().WithValidState().ExpiresInMSecs(tokenLifetimeMsecs);
@@ -84,7 +84,7 @@ public class WhenBackgroundTokenRefreshRequested
 
         result.Count.Should().BeGreaterThan(minimumNumberOfRefreshes, "There was an unexpectedly low number of refreshes");
         result.Count.Should().BeLessThan(estimatedMaximumNumberOfRefreshes, "There was an unexpectedly high number of refreshes");
-        
+
         return result;
     }
 }
@@ -104,12 +104,13 @@ public static class AccessTokenBuilder
     {
         token.AccessToken = Guid.NewGuid().ToString();
         token.RefreshToken = Guid.NewGuid().ToString();
+
         return token;
     }
 
-    public static OAuthAccessToken? ExpiresInMSecs(this OAuthAccessToken? token, int msecs)
+    public static OAuthAccessToken ExpiresInMSecs(this OAuthAccessToken? token, int msecs)
     {
-        token.ExpiresAt = DateTime.UtcNow.AddMilliseconds(msecs);
+        token!.ExpiresAt = DateTime.UtcNow.AddMilliseconds(msecs);
         return token;
     }
 }
