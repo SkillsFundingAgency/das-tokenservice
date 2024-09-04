@@ -40,20 +40,19 @@ public class HmrcExecutionPolicy : ExecutionPolicy
         {
             _logger.LogInformation("HttpRequestException - {HttpRequestException}", httpRequestException.ToString());
 
-            switch (httpRequestException.StatusCode)
+            if (httpRequestException.StatusCode == HttpStatusCode.NotFound)
             {
-                case HttpStatusCode.NotFound:
-                    _logger.LogInformation("Resource not found - {HttpRequestException}", httpRequestException.ToString());
-                    return default;
+                _logger.LogInformation("Resource not found - {HttpRequestException}", httpRequestException.ToString());
+                return default;
             }
         }
 
-        _logger.LogError(ex, "Exceeded retry limit - {Ex}", ex);
+        _logger.LogError(ex, "Exceeded retry limit - {Ex}", ex.ToString());
         throw ex;
     }
 
     private void OnRetryableFailure(Exception ex)
     {
-        _logger.LogInformation("Error calling HMRC - {Ex} - Will retry", ex);
+        _logger.LogInformation("Error calling HMRC - {Ex} - Will retry", ex.ToString());
     }
 }
