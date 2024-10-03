@@ -13,7 +13,6 @@ jobs:
 
   - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
     parameters:
-      SonarCloudProjectKey: SkillsFundingAgency_das-tokenservice
       ContinueOnVulnerablePackageScanError: true
 
   - task: DotNetCoreCLI@2
@@ -32,8 +31,8 @@ jobs:
       TargetFolder: '$(build.artifactstagingdirectory)/publish'
       OverWrite: true
 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact'
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Build Artifact
     inputs:
-      PathtoPublish: '$(build.artifactstagingdirectory)/publish'
-      ArtifactName: drop
+      targetPath: $(build.artifactstagingdirectory)/publish
+      artifactName: ${{ parameters.SolutionBaseName }}
