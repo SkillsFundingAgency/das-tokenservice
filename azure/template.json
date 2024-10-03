@@ -125,9 +125,7 @@
             "type": "Microsoft.Resources/resourceGroups",
             "location": "[parameters('resourceGroupLocation')]",
             "tags": "[parameters('tags')]",
-            "properties": {
-
-            }
+            "properties": {}
         },
         {
             "condition": "[greater(length(parameters('customHostName')), 0)]",
@@ -241,14 +239,6 @@
                                 {
                                     "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
                                     "value": "[reference(concat('application-insights-', parameters('utcValue'))).outputs.ConnectionString.value]"
-                                },
-                                {
-                                    "name": "WEBSITE_SWAP_WARMUP_PING_PATH",
-                                    "value": "/api/Healthcheck"
-                                },
-                                {
-                                    "name": "WEBSITE_SWAP_WARMUP_PING_STATUSES",
-                                    "value": "200"
                                 }
                             ]
                         }
