@@ -77,18 +77,18 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
     {
         try
         {
-            _logger.LogDebug("Refreshing token (expired {ExpiresAt})", token.ExpiresAt);
+            _logger.LogInformation("Refreshing token (expired {ExpiresAt})", token.ExpiresAt);
 
             var privilegedAccessToken = await GetPrivilegedAccessToken();
             var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(privilegedAccessToken, token.RefreshToken!));
 
-            _logger.LogDebug("Refresh token successful (new expiry {Expiry})", newToken?.ExpiresAt.ToString("yy-MMM-dd ddd HH:mm:ss") ?? "not available - new token is null");
+            _logger.LogInformation("Refresh token successful (new expiry {Expiry})", newToken?.ExpiresAt.ToString("yy-MMM-dd ddd HH:mm:ss") ?? "not available - new token is null");
 
             return newToken;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error trying to refresh access token.");
+            _logger.LogError(ex, "Error trying to refresh access token.");
             return null;
         }
     }
@@ -101,7 +101,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
 
         while (tempToken == null)
         {
-            _logger.LogDebug("Initial call to get a token: attempt {Attempts}", ++attempts);
+            _logger.LogInformation("Initial call to get a token: attempt {Attempts}", ++attempts);
 
             var privilegedAccessToken = await GetPrivilegedAccessToken();
             
@@ -113,6 +113,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
             }
 
             _logger.LogWarning("The attempt to get a token from HMRC failed - sleeping {RetryDelay} and trying again", _hmrcAuthTokenBrokerConfig.RetryDelay);
+            
             await Task.Delay(_hmrcAuthTokenBrokerConfig.RetryDelay);
         }
 
@@ -123,12 +124,12 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
 
     private async Task<string> GetPrivilegedAccessToken()
     {
-        _logger.LogDebug("Attempting to get privileged access token from service using refresh token");
+        _logger.LogInformation("Attempting to get privileged access token from service using refresh token");
 
         var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
         var privilegedToken = _totpService.Generate(secret);
 
-        _logger.LogDebug("Attempt to get privileged access token successfully");
+        _logger.LogInformation("Attempt to get privileged access token successfully");
 
         return privilegedToken;
     }
