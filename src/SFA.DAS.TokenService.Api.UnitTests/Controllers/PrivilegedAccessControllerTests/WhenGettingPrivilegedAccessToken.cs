@@ -18,7 +18,7 @@ public class WhenGettingPrivilegedAccessToken
 
     private Mock<IMediator> _mediator;
     private PrivilegedAccessController _controller;
-    private Mock<ILogger> _logger;
+    private Mock<ILogger<PrivilegedAccessController>> _logger;
 
     [SetUp]
     public void Arrange()
@@ -31,7 +31,7 @@ public class WhenGettingPrivilegedAccessToken
                 ExpiresAt = _expiresAt
             });
 
-        _logger = new Mock<ILogger>();
+        _logger = new Mock<ILogger<PrivilegedAccessController>>();
 
         _controller = new PrivilegedAccessController(_mediator.Object, _logger.Object);
     }
