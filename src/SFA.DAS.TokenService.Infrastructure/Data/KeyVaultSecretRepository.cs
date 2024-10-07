@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using Azure.Core;
+using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.Extensions.Logging;
 using SFA.DAS.TokenService.Domain.Data;
@@ -10,12 +11,33 @@ public class KeyVaultSecretRepository(KeyVaultConfiguration configuration, ILogg
 {
     public async Task<string> GetSecretAsync(string name)
     {
-        logger.LogDebug("Getting secret {Name} from KeyVault using Managed Service Identity", name);
-       
-        var vaultUri = new Uri(configuration.VaultUri ?? throw new InvalidOperationException("KeyVault Uri is null"));
-        var client = new SecretClient(vaultUri, new DefaultAzureCredential());
-        var response = await client.GetSecretAsync(configuration.VaultUri, name);
+        logger.LogInformation("Getting secret {Name} from KeyVault with Uri '{Uri}' using Managed Service Identity", name, configuration.VaultUri);
 
-        return response.Value.Value;
+        try
+        {
+            var vaultUri = new Uri(configuration.VaultUri ?? throw new InvalidOperationException("KeyVault Uri is null"));
+            
+            var options = new SecretClientOptions
+            {
+                Retry =
+                {
+                    Delay= TimeSpan.FromSeconds(2),
+                    MaxDelay = TimeSpan.FromSeconds(16),
+                    MaxRetries = 5,
+                    Mode = RetryMode.Exponential
+                }
+            };
+            
+            var client = new SecretClient(vaultUri, new DefaultAzureCredential(), options);
+        
+            var response = await client.GetSecretAsync(name);
+
+            return response.Value.Value;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Authentication Failed.");
+            throw;
+        }
     }
 }
