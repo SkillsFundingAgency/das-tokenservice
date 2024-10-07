@@ -6,7 +6,7 @@ using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken
 namespace SFA.DAS.TokenService.Api.Controllers;
 
 [Route("api/PrivilegedAccess")]
-public class PrivilegedAccessController(IMediator mediator, ILogger logger) : Controller
+public class PrivilegedAccessController(IMediator mediator, ILogger<PrivilegedAccessController> logger) : Controller
 {
     [HttpGet]
     [Route("", Name = "GetPrivilegedAccessToken")]

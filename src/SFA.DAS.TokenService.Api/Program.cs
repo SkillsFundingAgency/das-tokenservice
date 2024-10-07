@@ -21,8 +21,12 @@ builder.Services.AddLogging(loggingBuilder =>
 builder.Services.AddActiveDirectoryAuthentication(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
+app.MapControllers();
+
 app.UseHttpsRedirection();
 
+app.Run();
