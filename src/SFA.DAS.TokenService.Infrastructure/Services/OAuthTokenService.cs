@@ -1,4 +1,6 @@
-﻿using SFA.DAS.TokenService.Domain;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Domain.Services;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
 using SFA.DAS.TokenService.Infrastructure.Http;
@@ -9,17 +11,21 @@ public class OAuthTokenService : IOAuthTokenService
 {
     private readonly IHttpClientWrapper _httpClient;
     private readonly OAuthTokenServiceConfiguration _configuration;
+    private readonly ILogger<OAuthTokenService> _logger;
 
-    public OAuthTokenService(IHttpClientWrapper httpClient, OAuthTokenServiceConfiguration configuration)
+    public OAuthTokenService(IHttpClientWrapper httpClient, OAuthTokenServiceConfiguration configuration, ILogger<OAuthTokenService> logger)
     {
         _httpClient = httpClient;
         _configuration = configuration;
+        _logger = logger;
 
         _httpClient.AcceptHeaders.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.hmrc.1.0+json"));
     }
 
     public async Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken)
     {
+        _logger.LogInformation("OAuthTokenService. Getting access token using configuration: {Configuration}", JsonSerializer.Serialize(_configuration));
+        
         var request = new OAuthTokenRequest
         {
             ClientId = _configuration.ClientId,

@@ -129,7 +129,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
         var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
         var privilegedToken = _totpService.Generate(secret);
 
-        _logger.LogInformation("Attempt to get privileged access token successfully");
+        _logger.LogInformation("Attempt to get privileged access token completed successfully");
 
         return privilegedToken;
     }

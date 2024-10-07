@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
@@ -47,7 +48,7 @@ public class WhenGettingAccessTokenFromRefreshToken
                 TokenType = TokenType
             });
 
-        _service = new OAuthTokenService(_httpClient.Object, _configuration);
+        _service = new OAuthTokenService(_httpClient.Object, _configuration, Mock.Of<ILogger<OAuthTokenService>>());
     }
 
     [Test]
