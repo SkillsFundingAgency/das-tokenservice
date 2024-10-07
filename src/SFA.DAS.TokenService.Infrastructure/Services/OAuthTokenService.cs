@@ -24,8 +24,6 @@ public class OAuthTokenService : IOAuthTokenService
 
     public async Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken)
     {
-        _logger.LogInformation("OAuthTokenService. Getting access token using configuration: {Configuration}", JsonSerializer.Serialize(_configuration));
-        
         var request = new OAuthTokenRequest
         {
             ClientId = _configuration.ClientId,
@@ -33,9 +31,11 @@ public class OAuthTokenService : IOAuthTokenService
             GrantType = "client_credentials",
             Scopes = "read:apprenticeship-levy"
         };
-        
+
+        _logger.LogInformation("OAuthTokenService. OAuthTokenRequest token: {Token}", JsonSerializer.Serialize(request));
+
         var hmrcToken = await _httpClient.Post<OAuthTokenResponse>(_configuration.Url, request);
-        
+
         return new OAuthAccessToken
         {
             AccessToken = hmrcToken!.AccessToken,
@@ -56,9 +56,9 @@ public class OAuthTokenService : IOAuthTokenService
             Scopes = "read:apprenticeship-levy",
             RefreshToken = refreshToken
         };
-        
+
         var hmrcToken = await _httpClient.Post<OAuthTokenResponse>(_configuration.Url, request);
-        
+
         return new OAuthAccessToken
         {
             AccessToken = hmrcToken!.AccessToken,
