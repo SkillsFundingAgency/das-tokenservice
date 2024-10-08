@@ -23,6 +23,8 @@ builder.Services.AddApplicationServices();
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddControllers();
 
+// TODO wire up authentication/authorization
+
 var app = builder.Build();
 
 app.MapControllers();

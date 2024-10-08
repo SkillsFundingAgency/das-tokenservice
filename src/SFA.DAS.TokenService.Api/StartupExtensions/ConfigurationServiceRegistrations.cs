@@ -15,14 +15,14 @@ public static class ConfigurationServiceRegistrations
 
         services.AddSingleton(new KeyVaultConfiguration
         {
-            VaultUri = configuration["KeyVaultUri"]
+            VaultUri = configuration.GetValue<string>("KeyVaultUri")
         });
 
         services.AddSingleton(new OAuthTokenServiceConfiguration
         {
-            Url = configuration["HmrcTokenUri"],
-            ClientId = configuration["HmrcTokenClientId"],
-            ClientSecret = configuration["HmrcTokenSecret"]
+            Url = configuration.GetValue<string>("HmrcTokenUri"),
+            ClientId = configuration.GetValue<string>("HmrcTokenClientId"),
+            ClientSecret = configuration.GetValue<string>("HmrcTokenSecret")
         });
 
         services.AddSingleton(configuration);
