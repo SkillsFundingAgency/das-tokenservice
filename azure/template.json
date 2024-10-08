@@ -99,6 +99,9 @@
                 "description": "Name of the log analytics workspace resource"
             }
         },
+        "configurationStorageConnectionString": {
+            "type": "securestring"
+        },
         "sharedManagementResourceGroup": {
             "type": "string",
             "metadata": {
@@ -244,7 +247,11 @@
                                 {
                                     "name": "ConfigNames",
                                     "value": "[variables('configNames')]"
-                                  }
+                                },
+                                {
+                                    "name": "ConfigurationStorageConnectionString",
+                                    "value": "[parameters('configurationStorageConnectionString')]"
+                                }
                             ]
                         }
                     },
