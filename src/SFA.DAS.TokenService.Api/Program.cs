@@ -13,13 +13,11 @@ builder.Services.AddLogging(loggingBuilder =>
     loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
 });
 
-builder.Services.AddActiveDirectoryAuthentication(builder.Configuration);
+builder.Services.AddDasAuthentication(builder.Configuration);
+builder.Services.AddDasAuthorization();
 builder.Services.AddApplicationServices();
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddControllers();
-
-// builder.Services.AddApiAuthentication(builder.Configuration);
-// builder.Services.AddApiAuthorization();
 
 var app = builder.Build();
 
