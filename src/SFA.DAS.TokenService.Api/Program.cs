@@ -1,14 +1,6 @@
 using Microsoft.Extensions.Logging.ApplicationInsights;
-using SFA.DAS.TokenService.Api.Authorization;
 using SFA.DAS.TokenService.Api.StartupExtensions;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken;
-using SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
-using SFA.DAS.TokenService.Domain.Data;
-using SFA.DAS.TokenService.Domain.Services;
-using SFA.DAS.TokenService.Infrastructure.Data;
-using SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
-using SFA.DAS.TokenService.Infrastructure.Http;
-using SFA.DAS.TokenService.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
