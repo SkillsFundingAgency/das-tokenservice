@@ -116,7 +116,8 @@
         "resourceGroupName": "[concat(variables('resourceNamePrefix'),'-rg')]",
         "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
         "keyvaultName": "[concat(variables('resourceNamePrefix'), '-kv')]",
-        "keyvaultUri": "[concat('https://', variables('keyvaultName'), '.vault.azure.net/')]"
+        "keyvaultUri": "[concat('https://', variables('keyvaultName'), '.vault.azure.net/')]",
+        "configNames": "SFA.DAS.TokenService"
     },
     "resources": [
         {
@@ -239,7 +240,11 @@
                                 {
                                     "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
                                     "value": "[reference(concat('application-insights-', parameters('utcValue'))).outputs.ConnectionString.value]"
-                                }
+                                },
+                                {
+                                    "name": "ConfigNames",
+                                    "value": "[variables('configNames')]"
+                                  }
                             ]
                         }
                     },

@@ -26,19 +26,6 @@ public static class SecurityServicesCollectionExtensions
 
     public static IServiceCollection AddDasAuthentication(this IServiceCollection services, IConfiguration config)
     {
-        // services.AddAuthentication(auth =>
-        // {
-        //     auth.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        //
-        // }).AddJwtBearer(auth =>
-        // {
-        //     auth.Authority = $"https://login.microsoftonline.com/{configuration["Tenant"]}";
-        //     auth.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-        //     {
-        //         ValidAudiences = configuration["idaAudience"]!.Split(','),
-        //     };
-        // });
-        
         if (config.IsDevOrLocal())
         {
             services

@@ -1,8 +1,11 @@
 using Microsoft.Extensions.Logging.ApplicationInsights;
+using SFA.DAS.TokenService.Api.Extensions;
 using SFA.DAS.TokenService.Api.StartupExtensions;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var rootConfiguration = builder.Configuration.BuildDasConfiguration();
 
 builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<PrivilegedAccessQuery>());
 builder.Services.AddConfigurationOptions(builder.Configuration);
@@ -13,7 +16,7 @@ builder.Services.AddLogging(loggingBuilder =>
     loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
 });
 
-builder.Services.AddDasAuthentication(builder.Configuration);
+builder.Services.AddDasAuthentication(rootConfiguration);
 builder.Services.AddDasAuthorization();
 builder.Services.AddApplicationServices();
 builder.Services.AddApplicationInsightsTelemetry();
