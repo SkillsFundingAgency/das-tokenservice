@@ -25,10 +25,12 @@ public class OAuthTokenService : IOAuthTokenService
 
     public async Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken)
     {
+        var clientSecret = _configuration.ClientSecret == "." ? string.Empty : _configuration.ClientSecret;
+        
         var request = new OAuthTokenRequest
         {
             ClientId = _configuration.ClientId,
-            ClientSecret = $"{privilegedAccessToken}{_configuration.ClientSecret}",
+            ClientSecret = $"{privilegedAccessToken}{clientSecret}",
             GrantType = "client_credentials",
             Scopes = "read:apprenticeship-levy"
         };
