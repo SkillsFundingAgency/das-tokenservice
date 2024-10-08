@@ -33,7 +33,7 @@ public class OAuthTokenService : IOAuthTokenService
             Scopes = "read:apprenticeship-levy"
         };
 
-        _logger.LogInformation("OAuthTokenService. OAuthTokenRequest token: {Token}", JsonConvert.SerializeObject(request));
+        _logger.LogInformation("OAuthTokenService. OAuthTokenRequest token: {Token}. Config clientSecret: '{Secret}'", JsonConvert.SerializeObject(request), _configuration.ClientSecret);
 
         var hmrcToken = await _httpClient.Post<OAuthTokenResponse>(_configuration.Url, request);
 
