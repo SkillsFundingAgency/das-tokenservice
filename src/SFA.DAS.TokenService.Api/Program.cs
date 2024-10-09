@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 var rootConfiguration = builder.Configuration.BuildDasConfiguration();
 
 builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<PrivilegedAccessQuery>());
-builder.Services.AddConfigurationOptions(builder.Configuration);
+builder.Services.AddConfigurationOptions(rootConfiguration);
 
 builder.Services.AddLogging(loggingBuilder =>
 {

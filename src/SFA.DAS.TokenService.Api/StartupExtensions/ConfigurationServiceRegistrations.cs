@@ -1,9 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.Options;
 using SFA.DAS.Api.Common.Configuration;
-using SFA.DAS.TokenService.Domain.Data;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
-using SFA.DAS.TokenService.Infrastructure.Data;
 
 namespace SFA.DAS.TokenService.Api.StartupExtensions;
 

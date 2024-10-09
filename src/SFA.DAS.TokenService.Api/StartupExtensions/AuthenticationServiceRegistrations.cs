@@ -1,10 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using SFA.DAS.Api.Common.AppStart;
 using SFA.DAS.Api.Common.Configuration;
-using SFA.DAS.Api.Common.Infrastructure.Configuration;
-using SFA.DAS.TokenService.Api.Authentication;
-using SFA.DAS.TokenService.Api.Extensions;
 
 namespace SFA.DAS.TokenService.Api.StartupExtensions;
 
