@@ -23,10 +23,19 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseHsts();
+    app.UseAuthentication();
+}
 
+app.UseAuthorization();
+app.UseHttpsRedirection();
+app.MapControllers();
 app.UseHttpsRedirection();
 
 await app.RunAsync();
