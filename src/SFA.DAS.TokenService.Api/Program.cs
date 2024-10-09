@@ -16,8 +16,7 @@ builder.Services.AddLogging(loggingBuilder =>
     loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
 });
 
-builder.Services.AddDasAuthentication(rootConfiguration);
-builder.Services.AddDasAuthorization();
+builder.Services.AddActiveDirectoryAuthentication(rootConfiguration);
 builder.Services.AddApplicationServices();
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.AddControllers();

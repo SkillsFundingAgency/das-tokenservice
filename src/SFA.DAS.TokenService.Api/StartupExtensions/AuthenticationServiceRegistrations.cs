@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SFA.DAS.Api.Common.AppStart;
 using SFA.DAS.Api.Common.Configuration;
 using SFA.DAS.Api.Common.Infrastructure.Configuration;
@@ -9,27 +10,27 @@ namespace SFA.DAS.TokenService.Api.StartupExtensions;
 
 public static class AuthenticationServiceRegistrations
 {
-    private const string BasicAuthScheme = "BasicAuthentication";
-    public static IServiceCollection AddApiAuthentication(this IServiceCollection services, IConfiguration config)
+    public static void AddActiveDirectoryAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        if (config.IsDevOrLocal())
-        {
-            services
-                .AddAuthentication(BasicAuthScheme)
-                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(BasicAuthScheme, null);
-        }
-        else
-        {
-            var azureAdConfiguration = config
-                .GetSection(ConfigurationKeys.AzureActiveDirectoryApiConfiguration)
-                .Get<AzureActiveDirectoryConfiguration>();
+        var activeDirectorySettings = configuration.GetSection(ConfigurationKeys.AzureActiveDirectoryApiConfiguration).Get<AzureActiveDirectoryConfiguration>();
 
-            var policies = new Dictionary<string, string> { { PolicyNames.Default, RoleNames.Default } };
-            
-            services.AddAuthentication(azureAdConfiguration, policies);
-            services.AddSingleton<IClaimsTransformation, AzureAdScopeClaimTransformation>();
-        }
+        services.AddAuthorizationBuilder()
+            .AddPolicy("default", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireRole("Default");
+            });
 
-        return services;
+        services.AddAuthentication(auth =>
+        {
+            auth.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(auth =>
+        {
+            auth.Authority = $"https://login.microsoftonline.com/{activeDirectorySettings?.Tenant}";
+            auth.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            {
+                ValidAudiences = activeDirectorySettings?.Identifier.Split(','),
+            };
+        });
     }
 }
