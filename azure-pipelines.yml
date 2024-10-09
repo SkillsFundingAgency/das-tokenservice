@@ -70,32 +70,32 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
 
-# - stage: Deploy_TEST2
-#   dependsOn: Build
-#   displayName: Deploy to TEST2
-#   variables:
-#   - group: DevTest Management Resources
-#   - group: TEST2 DevTest Shared Resources
-#   jobs:
-#   - template: pipeline-templates/job/deploy.yml
-#     parameters:
-#       Environment: TEST2
-#       SolutionBaseName: $(SolutionBaseName)
-#       ServiceConnection: SFA-DAS-DevTest-ARM
+- stage: Deploy_TEST2
+  dependsOn: Build
+  displayName: Deploy to TEST2
+  variables:
+  - group: DevTest Management Resources
+  - group: TEST2 DevTest Shared Resources
+  jobs:
+  - template: pipeline-templates/job/deploy.yml
+    parameters:
+      Environment: TEST2
+      SolutionBaseName: $(SolutionBaseName)
+      ServiceConnection: SFA-DAS-DevTest-ARM
 
-# - stage: Deploy_PP
-#   dependsOn: Build
-#   displayName: Deploy to PP
-#   variables:
-#   - group: PreProd Management Resources
-#   - group: PreProd Shared Resources
-#   - group: PREPROD das-tokenservice
-#   jobs:
-#   - template: pipeline-templates/job/deploy.yml
-#     parameters:
-#       Environment: PP
-#       SolutionBaseName: $(SolutionBaseName)
-#       ServiceConnection: SFA-DIG-PreProd-ARM
+- stage: Deploy_PP
+  dependsOn: Build
+  displayName: Deploy to PP
+  variables:
+  - group: PreProd Management Resources
+  - group: PreProd Shared Resources
+  - group: PREPROD das-tokenservice
+  jobs:
+  - template: pipeline-templates/job/deploy.yml
+    parameters:
+      Environment: PP
+      SolutionBaseName: $(SolutionBaseName)
+      ServiceConnection: SFA-DIG-PreProd-ARM
 
 # - stage: Deploy_PROD
 #   dependsOn: Build
@@ -125,15 +125,15 @@ stages:
 #       SolutionBaseName: $(SolutionBaseName)
 #       ServiceConnection: SFA-ASM-ModelOffice-ARM
 
-# - stage: Deploy_DEMO
-#   dependsOn: Build
-#   displayName: Deploy to DEMO
-#   variables:
-#   - group: DevTest Management Resources
-#   - group: DEMO DevTest Shared Resources
-#   jobs:
-#   - template: pipeline-templates/job/deploy.yml
-#     parameters:
-#       Environment: DEMO
-#       SolutionBaseName: $(SolutionBaseName)
-#       ServiceConnection: SFA-DAS-DevTest-ARM
+- stage: Deploy_DEMO
+  dependsOn: Build
+  displayName: Deploy to DEMO
+  variables:
+  - group: DevTest Management Resources
+  - group: DEMO DevTest Shared Resources
+  jobs:
+  - template: pipeline-templates/job/deploy.yml
+    parameters:
+      Environment: DEMO
+      SolutionBaseName: $(SolutionBaseName)
+      ServiceConnection: SFA-DAS-DevTest-ARM
