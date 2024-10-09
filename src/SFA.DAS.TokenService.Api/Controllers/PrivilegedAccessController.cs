@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.TokenService.Api.Types;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken;
 
 namespace SFA.DAS.TokenService.Api.Controllers;
 
+[Authorize]
 [Route("api/PrivilegedAccess")]
 public class PrivilegedAccessController(IMediator mediator, ILogger<PrivilegedAccessController> logger) : Controller
 {
