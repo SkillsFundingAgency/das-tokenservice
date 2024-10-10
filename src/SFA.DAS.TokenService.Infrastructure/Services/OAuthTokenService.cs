@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Headers;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Domain.Services;
@@ -12,13 +11,11 @@ public class OAuthTokenService : IOAuthTokenService
 {
     private readonly IHttpClientWrapper _httpClient;
     private readonly OAuthTokenServiceConfiguration _configuration;
-    private readonly ILogger<OAuthTokenService> _logger;
-
-    public OAuthTokenService(IHttpClientWrapper httpClient, OAuthTokenServiceConfiguration configuration, ILogger<OAuthTokenService> logger)
+    
+    public OAuthTokenService(IHttpClientWrapper httpClient, OAuthTokenServiceConfiguration configuration)
     {
         _httpClient = httpClient;
         _configuration = configuration;
-        _logger = logger;
 
         _httpClient.AcceptHeaders.Add(new MediaTypeWithQualityHeaderValue("application/vnd.hmrc.1.0+json"));
     }
@@ -57,9 +54,7 @@ public class OAuthTokenService : IOAuthTokenService
             Scopes = "read:apprenticeship-levy",
             RefreshToken = refreshToken
         };  
-
-        _logger.LogInformation("GetAccessTokenFromRefreshToken OAuthTokenRefreshRequest: {Request}", JsonConvert.SerializeObject(request));
-
+        
         var hmrcToken = await _httpClient.Post<OAuthTokenResponse>(_configuration.Url, request);
 
         return new OAuthAccessToken
