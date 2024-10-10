@@ -1,22 +1,13 @@
-﻿using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 using SFA.DAS.TokenService.Domain;
 
-namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken
+namespace SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken;
+
+public class PrivilegedAccessQueryHandler(IHmrcAuthTokenBroker hmrcAuthTokenBroker) : IRequestHandler<PrivilegedAccessQuery, OAuthAccessToken>
 {
-    public class PrivilegedAccessQueryHandler : IAsyncRequestHandler<PrivilegedAccessQuery, OAuthAccessToken>
+    public async Task<OAuthAccessToken> Handle(PrivilegedAccessQuery request, CancellationToken cancellationToken)
     {
-        private readonly IHmrcAuthTokenBroker _hmrcAuthTokenBroker;
-
-        public PrivilegedAccessQueryHandler(IHmrcAuthTokenBroker hmrcAuthTokenBroker)
-        {
-            _hmrcAuthTokenBroker = hmrcAuthTokenBroker;
-        }
-
-        public Task<OAuthAccessToken> Handle(PrivilegedAccessQuery message)
-        {
-            return _hmrcAuthTokenBroker.GetTokenAsync();
-        }
+        return (await hmrcAuthTokenBroker.GetTokenAsync())!;
     }
 }

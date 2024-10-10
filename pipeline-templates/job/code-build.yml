@@ -1,86 +1,38 @@
 jobs:
-- job: 'CodeBuild'
+- job: CodeBuild
   pool:
-    name: "DAS - Continuous Integration"
-    demands:
-      - Agent.OS -equals Windows_NT
+    name: DAS - Continuous Integration Agents
   variables:
   - group: BUILD Management Resources
   - name: buildConfiguration
-    value: 'release'
-  - name: buildPlatform
-    value: 'any cpu'
+    value: release
   workspace:
     clean: all
   steps:
-    - task: gittools.gitversion.gitversion-task.GitVersion@5
-      displayName: GitVersion
-      inputs:
-        updateAssemblyInfo: true
+  - template: azure-pipelines-templates/build/step/gitversion.yml@das-platform-building-blocks
 
-    - task: SonarCloudPrepare@2
-      displayName: Prepare SonarCloud analysis configuration
-      condition: and(succeeded(), or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/main'), eq(variables['Build.Reason'], 'PullRequest')))
-      inputs:
-        SonarCloud: ESFA - SonarCloud
-        organization: $(SonarCloudOrganisationKey)
-        scannerMode: MSBuild
-        projectName: "$(Build.DefinitionName)"
-        projectKey: SkillsFundingAgency_das-tokenservice
+  - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
+    parameters:
+      ContinueOnVulnerablePackageScanError: true
 
-    - task: NuGetToolInstaller@0
-      displayName: "Use NuGet 4.x"
-      inputs:
-        versionSpec: 4.x
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish Website'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/SFA.DAS.TokenService.Api/SFA.DAS.TokenService.Api.csproj'
+      arguments: '--configuration $(buildConfiguration) --output $(build.artifactstagingdirectory)/publish --no-restore --no-build'
 
-    - task: NuGetCommand@2
-      displayName: "NuGet restore"
-      inputs:
-        restoreSolution: "src/SFA.DAS.TokenService.sln"
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+    inputs:
+      Contents: |
+        azure/**
+      TargetFolder: '$(build.artifactstagingdirectory)/publish'
+      OverWrite: true
 
-    - task: VSBuild@1
-      displayName: "Build solution src/SFA.DAS.Events.sln"
-      inputs:
-        solution: "src/SFA.DAS.TokenService.sln"
-        vsVersion: 15.0
-        msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactstagingdirectory)/publish"'
-        platform: "$(buildPlatform)"
-        configuration: "$(buildConfiguration)"
-        clean: true
-
-    - task: VSTest@2
-      displayName: "VsTest - testAssemblies"
-      inputs:
-        testAssemblyVer2: "**/bin/**/*UnitTests.dll"
-        platform: "$(buildPlatform)"
-        configuration: "$(buildConfiguration)"
-
-    - task: SonarCloudAnalyze@2
-      displayName: Run SonarCloud analysis
-      condition: and(succeeded(), or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/main'), eq(variables['Build.Reason'], 'PullRequest')))
-
-    - task: SonarCloudPublish@2
-      displayName: Publish SonarCloud analysis results on build summary
-      condition: and(succeeded(), or(in(variables['Build.SourceBranch'], 'refs/heads/master', 'refs/heads/main'), eq(variables['Build.Reason'], 'PullRequest')))
-      inputs:
-        pollingTimeoutSec: '300'
-
-    - task: NuGetCommand@2
-      displayName: "NuGet pack"
-      inputs:
-        command: pack
-        packagesToPack: "src/SFA.DAS.TokenService.Api.Client/SFA.DAS.TokenService.Api.Client.csproj;"
-        packDestination: "$(build.artifactstagingdirectory)/publish"
-        versioningScheme: byBuildNumber
-
-    - task: CopyFiles@2
-      displayName: "Copy Files to: $(build.artifactstagingdirectory)"
-      inputs:
-        Contents: |
-          azure/**
-        TargetFolder: "$(build.artifactstagingdirectory)/publish"
-
-    - task: PublishBuildArtifacts@1
-      displayName: "Publish Artifact"
-      inputs:
-        PathtoPublish: "$(build.artifactstagingdirectory)/publish"
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Build Artifact
+    inputs:
+      targetPath: $(build.artifactstagingdirectory)/publish
+      artifactName: ${{ parameters.SolutionBaseName }}

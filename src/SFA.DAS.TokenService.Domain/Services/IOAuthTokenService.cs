@@ -1,10 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿namespace SFA.DAS.TokenService.Domain.Services;
 
-namespace SFA.DAS.TokenService.Domain.Services
+public interface IOAuthTokenService
 {
-    public interface IOAuthTokenService
-    {
-        Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken);
-        Task<OAuthAccessToken> GetAccessTokenFromRefreshToken(string privilegedAccessToken, string refreshToken);
-    }
+    Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken);
+    Task<OAuthAccessToken> GetAccessTokenFromRefreshToken(string privilegedAccessToken, string refreshToken);
 }

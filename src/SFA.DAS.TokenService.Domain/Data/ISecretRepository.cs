@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿namespace SFA.DAS.TokenService.Domain.Data;
 
-namespace SFA.DAS.TokenService.Domain.Data
+public interface ISecretRepository
 {
-    public interface ISecretRepository
-    {
-        Task<string> GetSecretAsync(string name);
-    }
+    Task<string> GetSecretAsync(string name);
 }

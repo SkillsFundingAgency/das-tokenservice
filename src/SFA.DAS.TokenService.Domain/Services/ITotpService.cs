@@ -1,7 +1,6 @@
-﻿namespace SFA.DAS.TokenService.Domain.Services
+﻿namespace SFA.DAS.TokenService.Domain.Services;
+
+public interface ITotpService
 {
-    public interface ITotpService
-    {
-        string Generate(string secret);
-    }
+    string Generate(string secret);
 }

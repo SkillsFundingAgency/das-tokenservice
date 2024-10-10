@@ -1,45 +1,33 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Web.Http;
-using MediatR;
-using NLog;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.TokenService.Api.Types;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken;
 
-namespace SFA.DAS.TokenService.Api.Controllers
+namespace SFA.DAS.TokenService.Api.Controllers;
+
+[Authorize]
+[Route("api/PrivilegedAccess")]
+public class PrivilegedAccessController(IMediator mediator, ILogger<PrivilegedAccessController> logger) : Controller
 {
-    [RoutePrefix("api/PrivilegedAccess")]
-    public class PrivilegedAccessController : ApiController
+    [HttpGet]
+    [Route("", Name = "GetPrivilegedAccessToken")]
+    public async Task<IActionResult> GetPrivilegedAccessToken()
     {
-        private readonly IMediator _mediator;
-        private readonly ILogger _logger;
-
-        public PrivilegedAccessController(IMediator mediator, ILogger logger)
+        try
         {
-            _mediator = mediator;
-            _logger = logger;
+            var accessToken = await mediator.Send(new PrivilegedAccessQuery());
+
+            return Ok(new PrivilegedAccessToken
+            {
+                AccessCode = accessToken.AccessToken,
+                ExpiryTime = accessToken.ExpiresAt
+            });
         }
-
-        [HttpGet]
-        [Route("", Name = "GetPrivilegedAccessToken")]
-        [Authorize(Roles="PrivilegedAccess")]
-        public async Task<IHttpActionResult> GetPrivilegedAccessToken()
+        catch (Exception ex)
         {
-            try
-            {
-                var accessToken = await _mediator.SendAsync(new PrivilegedAccessQuery());
-
-                return Ok(new PrivilegedAccessToken
-                {
-                    AccessCode = accessToken.AccessToken,
-                    ExpiryTime = accessToken.ExpiresAt
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error getting privileged access token - " + ex.Message);
-                return InternalServerError();
-            }
+            logger.LogError(ex, "Error getting privileged access token.");
+            return StatusCode(500);
         }
     }
 }

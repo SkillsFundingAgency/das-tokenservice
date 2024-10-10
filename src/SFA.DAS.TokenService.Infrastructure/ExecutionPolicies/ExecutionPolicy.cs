@@ -1,100 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Polly;
+﻿using Polly;
+using Polly.Wrap;
 
-namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies
+namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
+
+public abstract class ExecutionPolicy
 {
-    public abstract class ExecutionPolicy
+    protected AsyncPolicyWrap?  RootPolicy { get; set; }
+    
+    public virtual async Task<T?> ExecuteAsync<T>(Func<Task<T>> func)
     {
-        protected Policy RootPolicy { get; set; }
-
-        public virtual void Execute(Action action)
+        try
         {
-            try
-            {
-                RootPolicy.Execute(action);
-            }
-            catch (Exception ex)
-            {
-                OnException(ex);
-            }
+            return await RootPolicy!.ExecuteAsync(func);
         }
-        public virtual async Task ExecuteAsync(Func<Task> action)
+        catch (Exception ex)
         {
-            try
-            {
-                await RootPolicy.ExecuteAsync(action);
-            }
-            catch (Exception ex)
-            {
-                OnException(ex);
-            }
+            return OnException<T>(ex);
         }
-
-        public virtual T Execute<T>(Func<T> func)
-        {
-            try
-            {
-                return RootPolicy.Execute<T>(func);
-            }
-            catch (Exception ex)
-            {
-                return OnException<T>(ex);
-            }
-        }
-        public virtual async Task<T> ExecuteAsync<T>(Func<Task<T>> func)
-        {
-            try
-            {
-                return await RootPolicy.ExecuteAsync(func);
-            }
-            catch (Exception ex)
-            {
-                return OnException<T>(ex);
-            }
-        }
+    }
 
 
-        protected virtual void OnException(Exception ex)
-        {
-            throw ex;
-        }
-        protected virtual T OnException<T>(Exception ex)
-        {
-            throw ex;
-        }
+    protected virtual T? OnException<T>(Exception ex) => throw ex;
 
-
-
-        protected static Policy CreateRetryPolicy<T>(int numberOfRetries, TimeSpan waitBetweenTries, Action<Exception> onRetryableFailure = null)
-            where T : Exception
+    protected static IAsyncPolicy CreateAsyncRetryPolicy<T>(Func<T, bool> canHandle, int numberOfRetries, TimeSpan waitBetweenTries, Action<Exception>? onRetryableFailure = null)
+        where T : Exception
+    {
+        var waits = new TimeSpan[numberOfRetries];
+        
+        for (var i = 0; i < waits.Length; i++)
         {
-            var waits = new TimeSpan[numberOfRetries];
-            for (var i = 0; i < waits.Length; i++)
-            {
-                waits[i] = waitBetweenTries;
-            }
-            return Policy.Handle<T>().WaitAndRetry(waits, (ex, wait) =>
-            {
-                onRetryableFailure?.Invoke(ex);
-            });
-        }
-        protected static Policy CreateAsyncRetryPolicy<T>(int numberOfRetries, TimeSpan waitBetweenTries, Action<Exception> onRetryableFailure = null)
-            where T : Exception
-        {
-            var waits = new TimeSpan[numberOfRetries];
-            for (var i = 0; i < waits.Length; i++)
-            {
-                waits[i] = waitBetweenTries;
-            }
-            return Policy.Handle<T>().WaitAndRetryAsync(waits, (ex, wait) =>
-            {
-                onRetryableFailure?.Invoke(ex);
-            });
+            waits[i] = waitBetweenTries;
         }
 
+        return Policy.Handle(canHandle).WaitAndRetryAsync(waits, (ex, wait) => { onRetryableFailure?.Invoke(ex); });
     }
 }

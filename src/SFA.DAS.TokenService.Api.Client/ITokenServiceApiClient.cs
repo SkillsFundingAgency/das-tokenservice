@@ -1,10 +1,8 @@
-﻿using System.Threading.Tasks;
-using SFA.DAS.TokenService.Api.Types;
+﻿using SFA.DAS.TokenService.Api.Types;
 
-namespace SFA.DAS.TokenService.Api.Client
+namespace SFA.DAS.TokenService.Api.Client;
+
+public interface ITokenServiceApiClient
 {
-    public interface ITokenServiceApiClient
-    {
-        Task<PrivilegedAccessToken> GetPrivilegedAccessTokenAsync();
-    }
+    Task<PrivilegedAccessToken?> GetPrivilegedAccessTokenAsync();
 }

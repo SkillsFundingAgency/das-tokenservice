@@ -1,9 +1,6 @@
-﻿using System;
+﻿namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 
-namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
+public interface IHmrcAuthTokenBrokerConfig
 {
-    public interface IHmrcAuthTokenBrokerConfig
-    {
-        TimeSpan RetryDelay { get; }
-    }
+    TimeSpan RetryDelay { get; }
 }

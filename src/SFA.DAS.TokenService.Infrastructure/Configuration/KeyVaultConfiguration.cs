@@ -1,9 +1,6 @@
-﻿namespace SFA.DAS.TokenService.Infrastructure.Configuration
+﻿namespace SFA.DAS.TokenService.Infrastructure.Configuration;
+
+public record KeyVaultConfiguration
 {
-    public class KeyVaultConfiguration
-    {
-        public string VaultUri { get; set; }
-        public string ClientId { get; set; }
-        public string ClientSecret { get; set; }
-    }
+    public string? VaultUri { get; set; }
 }
