@@ -116,14 +116,14 @@ stages:
   displayName: Deploy to MO
   variables:
   - group: MO Management Resources
-   - group: MO Shared Resources
-   - group: MO das-tokenservice
-   jobs:
-   - template: pipeline-templates/job/deploy.yml
-     parameters:
-       Environment: MO
-       SolutionBaseName: $(SolutionBaseName)
-       ServiceConnection: SFA-ASM-ModelOffice-ARM
+  - group: MO Shared Resources
+  - group: MO das-tokenservice
+  jobs:
+  - template: pipeline-templates/job/deploy.yml
+    parameters:
+      Environment: MO
+      SolutionBaseName: $(SolutionBaseName)
+      ServiceConnection: SFA-ASM-ModelOffice-ARM
 
 - stage: Deploy_DEMO
   dependsOn: Build
