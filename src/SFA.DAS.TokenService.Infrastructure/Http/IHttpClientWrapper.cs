@@ -1,13 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+﻿using System.Net.Http.Headers;
 
-namespace SFA.DAS.TokenService.Infrastructure.Http
+namespace SFA.DAS.TokenService.Infrastructure.Http;
+
+public interface IHttpClientWrapper
 {
-    public interface IHttpClientWrapper
-    {
-        List<MediaTypeWithQualityHeaderValue> AcceptHeaders { get; set; }
+    List<MediaTypeWithQualityHeaderValue> AcceptHeaders { get; set; }
 
-        Task<T> Post<T>(string url, object content);
-    }
+    Task<T?> Post<T>(string? url, object content);
 }

@@ -1,15 +1,12 @@
-﻿using System;
+﻿namespace SFA.DAS.EAS.Infrastructure.ExecutionPolicies;
 
-namespace SFA.DAS.EAS.Infrastructure.ExecutionPolicies
+[AttributeUsage(AttributeTargets.Class)]
+public class PolicyNameAttribute : Attribute
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class PolicyNameAttribute : Attribute
+    public PolicyNameAttribute(string name)
     {
-        public PolicyNameAttribute(string name)
-        {
-            Name = name;
-        }
-
-        public string Name { get; }
+        Name = name;
     }
+
+    public string Name { get; }
 }

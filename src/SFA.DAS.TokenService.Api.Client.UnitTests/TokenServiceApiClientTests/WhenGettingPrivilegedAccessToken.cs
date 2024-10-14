@@ -1,49 +1,47 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using FluentAssertions;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Api.Types;
 
-namespace SFA.DAS.TokenService.Api.Client.UnitTests.TokenServiceApiClientTests
+namespace SFA.DAS.TokenService.Api.Client.UnitTests.TokenServiceApiClientTests;
+
+public class WhenGettingPrivilegedAccessToken
 {
-    public class WhenGettingPrivilegedAccessToken
+    private const string ApiBaseUrl = "http://unit.tests";
+    private const string AccessCode = "ACCESS-CODE";
+    private readonly DateTime _expiryTime = new(2017, 2, 22, 20, 34, 12);
+
+    private Mock<ITokenServiceApiClientConfiguration> _configuration;
+    private Mock<ISecureHttpClient> _httpClient;
+    private TokenServiceApiClient _client;
+
+    [SetUp]
+    public void Arrange()
     {
-        private const string ApiBaseUrl = "http://unit.tests";
-        private const string AccessCode = "ACCESS-CODE";
-        private readonly DateTime ExpiryTime = new DateTime(2017, 2, 22, 20, 34, 12);
+        _configuration = new Mock<ITokenServiceApiClientConfiguration>();
+        _configuration.Setup(c => c.ApiBaseUrl).Returns(ApiBaseUrl);
 
-        private Mock<ITokenServiceApiClientConfiguration> _configuration;
-        private Mock<ISecureHttpClient> _httpClient;
-        private TokenServiceApiClient _client;
+        _httpClient = new Mock<ISecureHttpClient>();
+        _httpClient.Setup(c => c.GetAsync($"{ApiBaseUrl}/api/PrivilegedAccess"))
+            .ReturnsAsync(JsonConvert.SerializeObject(new PrivilegedAccessToken
+            {
+                AccessCode = AccessCode,
+                ExpiryTime = _expiryTime
+            }));
 
-        [SetUp]
-        public void Arrange()
-        {
-            _configuration = new Mock<ITokenServiceApiClientConfiguration>();
-            _configuration.Setup(c => c.ApiBaseUrl).Returns(ApiBaseUrl);
+        _client = new TokenServiceApiClient(_configuration.Object, _httpClient.Object);
+    }
 
-            _httpClient = new Mock<ISecureHttpClient>();
-            _httpClient.Setup(c => c.GetAsync($"{ApiBaseUrl}/api/PrivilegedAccess"))
-                .ReturnsAsync(JsonConvert.SerializeObject(new PrivilegedAccessToken
-                {
-                    AccessCode = AccessCode,
-                    ExpiryTime = ExpiryTime
-                }));
+    [Test]
+    public async Task ThenItShouldReturnAccessToken()
+    {
+        // Act
+        var actual = await _client.GetPrivilegedAccessTokenAsync();
 
-            _client = new TokenServiceApiClient(_configuration.Object, _httpClient.Object);
-        }
-
-        [Test]
-        public async Task ThenItShouldReturnAccessToken()
-        {
-            // Act
-            var actual = await _client.GetPrivilegedAccessTokenAsync();
-
-            // Assert
-            Assert.IsNotNull(actual);
-            Assert.AreEqual(AccessCode, actual.AccessCode);
-            Assert.AreEqual(ExpiryTime, actual.ExpiryTime);
-        }
+        // Assert
+        actual.Should().NotBeNull();
+        actual!.AccessCode.Should().Be(AccessCode);
+        actual.ExpiryTime.Should().Be(_expiryTime);
     }
 }

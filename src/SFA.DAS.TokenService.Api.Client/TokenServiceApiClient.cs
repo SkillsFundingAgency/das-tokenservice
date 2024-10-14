@@ -1,30 +1,19 @@
-﻿using System;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SFA.DAS.TokenService.Api.Types;
 
-namespace SFA.DAS.TokenService.Api.Client
+namespace SFA.DAS.TokenService.Api.Client;
+
+public class TokenServiceApiClient(ITokenServiceApiClientConfiguration configuration, ISecureHttpClient httpClient) : ITokenServiceApiClient
 {
-    public class TokenServiceApiClient : ITokenServiceApiClient
+    public TokenServiceApiClient(ITokenServiceApiClientConfiguration configuration) : this(configuration, new SecureHttpClient(configuration))
     {
-        private readonly ITokenServiceApiClientConfiguration _configuration;
-        private readonly ISecureHttpClient _httpClient;
+    }
 
-        public TokenServiceApiClient(ITokenServiceApiClientConfiguration configuration)
-            : this(configuration, new SecureHttpClient(configuration))
-        {
-        }
-        internal TokenServiceApiClient(ITokenServiceApiClientConfiguration configuration, ISecureHttpClient httpClient)
-        {
-            _configuration = configuration;
-            _httpClient = httpClient;
-        }
-
-        public async Task<PrivilegedAccessToken> GetPrivilegedAccessTokenAsync()
-        {
-            var absoluteUri = new Uri(new Uri(_configuration.ApiBaseUrl), "api/PrivilegedAccess");
-            var json = await _httpClient.GetAsync(absoluteUri.ToString());
-            return JsonConvert.DeserializeObject<PrivilegedAccessToken>(json);
-        }
+    public async Task<PrivilegedAccessToken?> GetPrivilegedAccessTokenAsync()
+    {
+        var absoluteUri = new Uri(new Uri(configuration.ApiBaseUrl!), "api/PrivilegedAccess");
+        var json = await httpClient.GetAsync(absoluteUri.ToString());
+        
+        return JsonConvert.DeserializeObject<PrivilegedAccessToken>(json);
     }
 }

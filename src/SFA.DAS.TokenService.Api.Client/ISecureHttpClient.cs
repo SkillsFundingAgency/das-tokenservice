@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿namespace SFA.DAS.TokenService.Api.Client;
 
-namespace SFA.DAS.TokenService.Api.Client
+public interface ISecureHttpClient
 {
-    internal interface ISecureHttpClient
-    {
-        Task<string> GetAsync(string url);
-    }
+    Task<string> GetAsync(string url);
 }

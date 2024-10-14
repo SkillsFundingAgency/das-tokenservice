@@ -1,86 +1,90 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.Web.Http.Results;
+﻿using FluentAssertions;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
-using NLog;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Api.Controllers;
 using SFA.DAS.TokenService.Api.Types;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken;
+using SFA.DAS.TokenService.Domain;
 
-namespace SFA.DAS.TokenService.Api.UnitTests.Controllers.PrivilegedAccessControllerTests
+namespace SFA.DAS.TokenService.Api.UnitTests.Controllers.PrivilegedAccessControllerTests;
+
+public class WhenGettingPrivilegedAccessToken
 {
-    public class WhenGettingPrivilegedAccessToken
+    private const string AccessCode = "ACCESS-TOKEN";
+    private readonly DateTime _expiresAt = new(2017, 2, 22, 13, 45, 26);
+
+    private Mock<IMediator> _mediator;
+    private PrivilegedAccessController _controller;
+    private Mock<ILogger<PrivilegedAccessController>> _logger;
+
+    [SetUp]
+    public void Arrange()
     {
-        private const string AccessCode = "ACCESS-TOKEN";
-        private readonly DateTime ExpiresAt = new DateTime(2017, 2, 22, 13, 45, 26);
+        _mediator = new Mock<IMediator>();
+        _mediator.Setup(m => m.Send(It.IsAny<PrivilegedAccessQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new OAuthAccessToken
+            {
+                AccessToken = AccessCode,
+                ExpiresAt = _expiresAt
+            });
 
-        private Mock<IMediator> _mediator;
-        private PrivilegedAccessController _controller;
-        private Mock<ILogger> _logger;
+        _logger = new Mock<ILogger<PrivilegedAccessController>>();
 
-        [SetUp]
-        public void Arrange()
-        {
-            _mediator = new Mock<IMediator>();
-            _mediator.Setup(m => m.SendAsync(It.IsAny<PrivilegedAccessQuery>()))
-                .ReturnsAsync(new Domain.OAuthAccessToken
-                {
-                    AccessToken = AccessCode,
-                    ExpiresAt = ExpiresAt
-                });
+        _controller = new PrivilegedAccessController(_mediator.Object, _logger.Object);
+    }
 
-            _logger = new Mock<ILogger>();
+    [TearDown]
+    public void TearDown() => _controller.Dispose();
 
-            _controller = new PrivilegedAccessController(_mediator.Object, _logger.Object);
-        }
+    [Test]
+    public async Task ThenItShouldReturnAnOkResult()
+    {
+        // Act
+        var actual = await _controller.GetPrivilegedAccessToken() as OkObjectResult;
 
-        [Test]
-        public async Task ThenItShouldReturnAnOkResult()
-        {
-            // Act
-            var actual = await _controller.GetPrivilegedAccessToken();
+        // Assert
+        actual.Should().NotBeNull();
+        var model = actual!.Value as PrivilegedAccessToken;
+        model.Should().NotBeNull();
+    }
 
-            // Assert
-            Assert.IsNotNull(actual);
-            Assert.IsInstanceOf<OkNegotiatedContentResult<PrivilegedAccessToken>>(actual);
-        }
+    [Test]
+    public async Task ThenItShouldReturnAccessCode()
+    {
+        // Act
+        var actual = await _controller.GetPrivilegedAccessToken() as OkObjectResult;
 
-        [Test]
-        public async Task ThenItShouldReturnAccessCode()
-        {
-            // Act
-            var actual = await _controller.GetPrivilegedAccessToken() as OkNegotiatedContentResult<PrivilegedAccessToken>;
+        // Assert
+        var model = actual!.Value as PrivilegedAccessToken;
+        model!.AccessCode.Should().Be(AccessCode);
+    }
 
-            // Assert
-            Assert.AreEqual(AccessCode, actual.Content.AccessCode);
-        }
+    [Test]
+    public async Task ThenItShouldReturnExpiryTime()
+    {
+        // Act
+        var actual = await _controller.GetPrivilegedAccessToken() as OkObjectResult;
 
-        [Test]
-        public async Task ThenItShouldReturnExpiryTime()
-        {
-            // Act
-            var actual = await _controller.GetPrivilegedAccessToken() as OkNegotiatedContentResult<PrivilegedAccessToken>;
+        // Assert
+        var model = actual!.Value as PrivilegedAccessToken;
+        model!.ExpiryTime.Should().Be(_expiresAt);
+    }
 
-            // Assert
-            Assert.AreEqual(ExpiresAt, actual.Content.ExpiryTime);
-        }
+    [Test]
+    public async Task ThenItShouldReturnInternalServerErrorWhenExceptionOccurs()
+    {
+        // Arrange
+        _mediator.Setup(m => m.Send(It.IsAny<PrivilegedAccessQuery>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Exception("Unit test"));
 
-        [Test]
-        public async Task ThenItShouldReturnInternalServerErrorWhenExceptionOccurs()
-        {
-            // Arrange
-            _mediator.Setup(m => m.SendAsync(It.IsAny<PrivilegedAccessQuery>()))
-                .ThrowsAsync(new Exception("Unit test"));
+        // Act
+        var actual = await _controller.GetPrivilegedAccessToken() as StatusCodeResult;
 
-            // Act
-            var actual = await _controller.GetPrivilegedAccessToken();
-
-            // Assert
-            Assert.IsNotNull(actual);
-            Assert.IsInstanceOf<InternalServerErrorResult>(actual);
-        }
-
+        // Assert
+        actual.Should().NotBeNull();
+        actual!.StatusCode.Should().Be(500);
     }
 }

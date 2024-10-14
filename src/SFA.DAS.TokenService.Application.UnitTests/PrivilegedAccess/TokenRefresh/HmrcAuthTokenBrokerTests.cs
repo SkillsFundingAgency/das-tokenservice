@@ -1,170 +1,151 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 using SFA.DAS.TokenService.Domain.Data;
 using SFA.DAS.TokenService.Domain.Services;
-using NLog;
 using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 
-namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.TokenRefresh
+namespace SFA.DAS.TokenService.Application.UnitTests.PrivilegedAccess.TokenRefresh;
+
+public class HmrcAuthTokenBrokerTests
 {
-    [TestFixture]
-    public class HmrcAuthTokenBrokerTests 
+    [Test]
+    public async Task GetTokenAsync_InitialRequestFails_ShouldStillGoOnToGetToken()
     {
-        [Test]
-        public async Task GetTokenAsync_InitialRequestFails_ShouldStillGoOnToGetToken()
-        {
-            var fixtures = new HmrcAuthTokenBrokerTestFixtures()
-                .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed"));
+        var fixtures = new HmrcAuthTokenBrokerTestFixtures()
+            .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed", null, HttpStatusCode.InternalServerError));
 
-            var svc = fixtures.CreateHmrcAuthTokenBroker();
+        var svc = fixtures.CreateHmrcAuthTokenBroker();
 
-            var accessToken = await svc.GetTokenAsync();
+        var accessToken = await svc.GetTokenAsync();
 
-            Assert.IsNotNull(accessToken);
-        }
-
-        [Test]
-        public async Task GetTokenAsync_InitialThreeRequestFail_ShouldStillGoOnToGetToken()
-        {
-            var fixtures = new HmrcAuthTokenBrokerTestFixtures()
-                .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed"))
-                .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed"))
-                .WithInitialTaskResult(() => null);
-
-            var svc = fixtures.CreateHmrcAuthTokenBroker();
-
-            var accessToken = await svc.GetTokenAsync();
-
-            Assert.IsNotNull(accessToken);
-        }
-
-        [Test]
-        public async Task GetTokenAsync_InitialThreeRequestFail_ShouldCallPostFourTimes()
-        {
-            var fixtures = new HmrcAuthTokenBrokerTestFixtures()
-                .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed"))
-                .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed"))
-                .WithInitialTaskResult(() => null);
-
-            var svc = fixtures.CreateHmrcAuthTokenBroker();
-
-            var accessToken = await svc.GetTokenAsync();
-
-            fixtures.OAuthTokenServiceMock.Verify(ots => ots.GetAccessToken(It.IsAny<string>()), Times.Exactly(4));
-        }
-
-        [Test]
-        public async Task GetTokenAsync_WhenFirstRequestFails_ShouldCallPostTwice()
-        {
-            var fixtures = new HmrcAuthTokenBrokerTestFixtures()
-                .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed"));
-
-            var svc = fixtures.CreateHmrcAuthTokenBroker();
-
-            var accessToken = await svc.GetTokenAsync();
-
-            fixtures.OAuthTokenServiceMock.Verify(ots => ots.GetAccessToken(It.IsAny<string>()), Times.Exactly(2));
-        }
-
-        [Test]
-        public async Task GetTokenAsync_WhenFirstSucceeds_ShouldReturnExpectedToken()
-        {
-            var accessToken = Guid.NewGuid().ToString();
-            var refreshToken = Guid.NewGuid().ToString();
-
-            var fixtures = new HmrcAuthTokenBrokerTestFixtures()
-                .WithInitialTaskResult(() => new OAuthAccessToken
-                {
-                    AccessToken = accessToken,
-                    RefreshToken = refreshToken
-                });
-
-            var svc = fixtures.CreateHmrcAuthTokenBroker();
-
-            var token = await svc.GetTokenAsync();
-
-            Assert.AreEqual(accessToken, token.AccessToken, "Access token is not the expected value");
-            Assert.AreEqual(refreshToken, token.RefreshToken, "Refresh token is not the expected value");
-        }
+        accessToken.Should().NotBeNull();
     }
 
-    public class HmrcAuthTokenBrokerTestFixtures
+    [Test]
+    public async Task GetTokenAsync_InitialThreeRequestFail_ShouldStillGoOnToGetToken()
     {
-        public HmrcAuthTokenBrokerTestFixtures()
-        {
-            LoggerMock = new Mock<ILogger>();
-            OAuthTokenServiceMock = new Mock<IOAuthTokenService>();
-            SecretRepositoryMock = new Mock<ISecretRepository>();
-            TotpServiceMock = new Mock<ITotpService>();
-            TokenRefresherMock = new Mock<ITokenRefresher>();
-            HmrcAuthTokenBrokerConfigMock = new Mock<IHmrcAuthTokenBrokerConfig>();
+        var fixtures = new HmrcAuthTokenBrokerTestFixtures()
+            .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed", null, HttpStatusCode.InternalServerError))
+            .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed", null, HttpStatusCode.InternalServerError))
+            .WithInitialTaskResult(() => null);
 
-            AccessTokenRequests = new Queue<Func<OAuthAccessToken>>();
+        var svc = fixtures.CreateHmrcAuthTokenBroker();
 
-            HmrcAuthTokenBrokerConfigMock.Setup(config => config.RetryDelay).Returns(TimeSpan.Zero);
+        var accessToken = await svc.GetTokenAsync();
 
-            OAuthTokenServiceMock
-                .Setup(ots => ots.GetAccessToken(It.IsAny<string>()))
-                .Returns(() =>
-                {
-                    var func = AccessTokenRequests.Dequeue();
-                    return Task.FromResult(func());
-                });
-        }
+        accessToken.Should().NotBeNull();
+    }
 
-        public Mock<NLog.ILogger> LoggerMock { get; }
-        public NLog.ILogger Logger => LoggerMock.Object;
+    [Test]
+    public async Task GetTokenAsync_InitialThreeRequestFail_ShouldCallPostFourTimes()
+    {
+        var fixtures = new HmrcAuthTokenBrokerTestFixtures()
+            .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed", null, HttpStatusCode.InternalServerError))
+            .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed", null, HttpStatusCode.InternalServerError))
+            .WithInitialTaskResult(() => null);
 
-        public Mock<IOAuthTokenService> OAuthTokenServiceMock { get; }
-        public IOAuthTokenService OAuthTokenService => OAuthTokenServiceMock.Object;
+        var svc = fixtures.CreateHmrcAuthTokenBroker();
 
-        public Mock<ISecretRepository> SecretRepositoryMock { get;  }
-        public ISecretRepository SecretRepository => SecretRepositoryMock.Object;
+        await svc.GetTokenAsync();
 
-        public Mock<ITotpService> TotpServiceMock { get; }
-        public ITotpService TotpService => TotpServiceMock.Object;
+        fixtures.OAuthTokenServiceMock.Verify(ots => ots.GetAccessToken(It.IsAny<string>()), Times.Exactly(4));
+    }
 
-        public Mock<ITokenRefresher> TokenRefresherMock { get;  }
-        public ITokenRefresher TokenRefresher => TokenRefresherMock.Object;
+    [Test]
+    public async Task GetTokenAsync_WhenFirstRequestFails_ShouldCallPostTwice()
+    {
+        var fixtures = new HmrcAuthTokenBrokerTestFixtures()
+            .WithInitialTaskResult(() => throw new HttpRequestException("Initial token request has failed", null, HttpStatusCode.InternalServerError));
 
-        public Mock<IHmrcAuthTokenBrokerConfig> HmrcAuthTokenBrokerConfigMock { get; set; }
-        public IHmrcAuthTokenBrokerConfig HmrcAuthTokenBrokerConfig => HmrcAuthTokenBrokerConfigMock.Object;
+        var svc = fixtures.CreateHmrcAuthTokenBroker();
 
-        public Queue<Func<OAuthAccessToken>> AccessTokenRequests { get; }
+        await svc.GetTokenAsync();
 
-        public HmrcAuthTokenBrokerTestFixtures WithInitialTaskResult(Func<OAuthAccessToken> getter)
-        {
-            AccessTokenRequests.Enqueue(getter);
-            return this;
-        }
+        fixtures.OAuthTokenServiceMock.Verify(ots => ots.GetAccessToken(It.IsAny<string>()), Times.Exactly(2));
+    }
 
-        public HmrcAuthTokenBroker CreateHmrcAuthTokenBroker()
-        {
-            // Make sure that the queue is terminated with a 
-            WithInitialTaskResult(() => new OAuthAccessToken
+    [Test]
+    public async Task GetTokenAsync_WhenFirstSucceeds_ShouldReturnExpectedToken()
+    {
+        var accessToken = Guid.NewGuid().ToString();
+        var refreshToken = Guid.NewGuid().ToString();
+
+        var fixtures = new HmrcAuthTokenBrokerTestFixtures()
+            .WithInitialTaskResult(() => new OAuthAccessToken
             {
-                AccessToken = "AccessToken",
-                ExpiresAt = DateTime.Now.AddMinutes(30),
-                RefreshToken = "RefreshToken"
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
             });
 
-            return new HmrcAuthTokenBroker(
-                new HmrcExecutionPolicy(Logger), 
-                Logger,
-                OAuthTokenService, 
-                SecretRepository,
-                TotpService,
-                TokenRefresher,
-                HmrcAuthTokenBrokerConfig
-                );
-        }
+        var svc = fixtures.CreateHmrcAuthTokenBroker();
+
+        var token = await svc.GetTokenAsync();
+
+        token.Should().NotBeNull();
+        token!.AccessToken.Should().Be(accessToken, "Access token is not the expected value");
+        token.RefreshToken.Should().Be(refreshToken, "Refresh token is not the expected value");
+    }
+}
+
+public class HmrcAuthTokenBrokerTestFixtures
+{
+    public HmrcAuthTokenBrokerTestFixtures()
+    {
+        OAuthTokenServiceMock = new Mock<IOAuthTokenService>();
+        SecretRepositoryMock = new Mock<ISecretRepository>();
+        _totpServiceMock = new Mock<ITotpService>();
+        _tokenRefresherMock = new Mock<ITokenRefresher>();
+        _hmrcAuthTokenBrokerConfigMock = new Mock<IHmrcAuthTokenBrokerConfig>();
+
+        _accessTokenRequests = new Queue<Func<OAuthAccessToken?>>();
+
+        _hmrcAuthTokenBrokerConfigMock.Setup(config => config.RetryDelay).Returns(TimeSpan.Zero);
+
+        OAuthTokenServiceMock
+            .Setup(ots => ots.GetAccessToken(It.IsAny<string>()))
+            .Returns(() =>
+            {
+                var func = _accessTokenRequests.Dequeue();
+                return Task.FromResult(func())!;
+            });
+    }
+
+    public Mock<IOAuthTokenService> OAuthTokenServiceMock { get; }
+    private Mock<ISecretRepository> SecretRepositoryMock { get; }
+    private readonly Mock<ITotpService> _totpServiceMock;
+    private readonly Mock<ITokenRefresher> _tokenRefresherMock;
+    private readonly Mock<IHmrcAuthTokenBrokerConfig> _hmrcAuthTokenBrokerConfigMock;
+    private readonly Queue<Func<OAuthAccessToken?>> _accessTokenRequests;
+
+    public HmrcAuthTokenBrokerTestFixtures WithInitialTaskResult(Func<OAuthAccessToken?> getter)
+    {
+        _accessTokenRequests.Enqueue(getter);
+        return this;
+    }
+
+    public HmrcAuthTokenBroker CreateHmrcAuthTokenBroker()
+    {
+        // Make sure that the queue is terminated with a 
+        WithInitialTaskResult(() => new OAuthAccessToken
+        {
+            AccessToken = "AccessToken",
+            ExpiresAt = DateTime.Now.AddMinutes(30),
+            RefreshToken = "RefreshToken"
+        });
+
+        return new HmrcAuthTokenBroker(
+            new HmrcExecutionPolicy(Mock.Of<ILogger<HmrcExecutionPolicy>>(), new TimeSpan(0, 0, 0, 0, 10)),
+            Mock.Of<ILogger<HmrcAuthTokenBroker>>(),
+            OAuthTokenServiceMock.Object,
+            SecretRepositoryMock.Object,
+            _totpServiceMock.Object,
+            _tokenRefresherMock.Object,
+            _hmrcAuthTokenBrokerConfigMock.Object
+        );
     }
 }

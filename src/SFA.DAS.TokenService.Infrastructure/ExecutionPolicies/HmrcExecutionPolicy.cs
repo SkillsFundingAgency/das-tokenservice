@@ -1,75 +1,58 @@
-﻿using System;
-using System.Web;
-using NLog;
+﻿using System.Net;
+using Microsoft.Extensions.Logging;
 using Polly;
 using SFA.DAS.EAS.Infrastructure.ExecutionPolicies;
 
-namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies
+namespace SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
+
+[PolicyName(Name)]
+public class HmrcExecutionPolicy : ExecutionPolicy
 {
-    [PolicyName(Name)]
-    public class HmrcExecutionPolicy : ExecutionPolicy
+    public const string Name = "HMRC Policy";
+    private readonly ILogger<HmrcExecutionPolicy> _logger;
+
+    public HmrcExecutionPolicy(ILogger<HmrcExecutionPolicy> logger)
     {
-        public const string Name = "HMRC Policy";
+        _logger = logger;
+        TimeSpan retryWaitTime = new(0, 0, 0, 10);
+        Initialize(retryWaitTime);
+    }
+    
+    public HmrcExecutionPolicy(ILogger<HmrcExecutionPolicy> logger, TimeSpan retryWaitTime)
+    {
+        _logger = logger;
+        Initialize(retryWaitTime);
+    }
+    
+    private void Initialize(TimeSpan retryWaitTime)
+    {
+        var tooManyRequestsPolicy = Policy.Handle<HttpRequestException>(ex => ex.StatusCode.Equals(HttpStatusCode.TooManyRequests)).WaitAndRetryForeverAsync(i => retryWaitTime, (ex, ts) => OnRetryableFailure(ex));
+        var requestTimeoutPolicy = Policy.Handle<HttpRequestException>(ex => ex.StatusCode.Equals(HttpStatusCode.RequestTimeout)).WaitAndRetryForeverAsync(i => retryWaitTime, (ex, ts) => OnRetryableFailure(ex));
+        var serviceUnavailablePolicy = CreateAsyncRetryPolicy<HttpRequestException>(ex => ex.StatusCode.Equals(HttpStatusCode.ServiceUnavailable), 5, retryWaitTime, OnRetryableFailure);
+        var internalServerErrorPolicy = CreateAsyncRetryPolicy<HttpRequestException>(ex => ex.StatusCode.Equals(HttpStatusCode.InternalServerError), 5, retryWaitTime, OnRetryableFailure);
 
-        private readonly ILogger _logger;
-        private readonly Policy TooManyRequestsPolicy;
-        private readonly Policy ServiceUnavailablePolicy;
-        private readonly Policy InternalServerErrorPolicy;
-        private readonly Policy RequestTimeoutPolicy;
-        private readonly Policy UnauthorizedPolicy;
+        RootPolicy = Policy.WrapAsync(tooManyRequestsPolicy, serviceUnavailablePolicy, internalServerErrorPolicy, requestTimeoutPolicy);
+    }
 
-        public HmrcExecutionPolicy(ILogger logger)
+    protected override T? OnException<T>(Exception ex) where T : default
+    {
+        if (ex is HttpRequestException httpRequestException)
         {
-            _logger = logger;
+            _logger.LogInformation("HttpRequestException - {HttpRequestException}", httpRequestException.ToString());
 
-            TooManyRequestsPolicy = Policy.Handle<HttpException>().WaitAndRetryForeverAsync((i) => new TimeSpan(0, 0, 10), (ex, ts) =>
+            if (httpRequestException.StatusCode == HttpStatusCode.NotFound)
             {
-                if (((HttpException)ex).WebEventCode == 429)
-                {
-                    OnRetryableFailure(ex, 429, "Rate limit has been reached");
-                }
-            });
-            RequestTimeoutPolicy = Policy.Handle<HttpException>().WaitAndRetryForeverAsync((i) => new TimeSpan(0, 0, 10), (ex, ts) =>
-            {
-                if (((HttpException)ex).WebEventCode == 408)
-                {
-                    OnRetryableFailure(ex, 408, "Request has time out");
-                }
-            });
-            ServiceUnavailablePolicy = CreateAsyncRetryPolicy<HttpException>(5, new TimeSpan(0, 0, 10), (ex) =>
-            {
-                if (((HttpException)ex).WebEventCode == 503)
-                {
-                    OnRetryableFailure(ex, 503, "Service is unavailable");
-                }
-            });
-            InternalServerErrorPolicy = CreateAsyncRetryPolicy<HttpException>(5, new TimeSpan(0, 0, 10), (ex) =>
-            {
-                if (((HttpException)ex).WebEventCode == 500)
-                {
-                    OnRetryableFailure(ex, 500, "Internal server error");
-                }
-            });
-            UnauthorizedPolicy =
-                CreateAsyncRetryPolicy<HttpException>(5, new TimeSpan(0, 0, 10), (ex) =>
-                {
-                    if (((HttpException)ex).WebEventCode == 401)
-                    {
-                        OnRetryableFailure(ex, 401, ex.Message);
-                    }
-                });
-            RootPolicy = Policy.WrapAsync(TooManyRequestsPolicy, ServiceUnavailablePolicy, InternalServerErrorPolicy, RequestTimeoutPolicy, UnauthorizedPolicy);
+                _logger.LogInformation("Resource not found - {HttpRequestException}", httpRequestException.ToString());
+                return default;
+            }
         }
 
-        protected override T OnException<T>(Exception ex)
-        {
-            _logger.Error(ex, $"Exceeded retry limit - {ex.Message}");
-            return default(T);
-        }
+        _logger.LogError(ex, "Exceeded retry limit - {Ex}", ex.ToString());
+        throw ex;
+    }
 
-        private void OnRetryableFailure(Exception ex, int statusCode, string message)
-        {
-            _logger.Info($"Error calling HMRC - {ex.Message} - Will retry");
-        }
+    private void OnRetryableFailure(Exception ex)
+    {
+        _logger.LogInformation("Error calling HMRC - {Ex} - Will retry", ex.ToString());
     }
 }

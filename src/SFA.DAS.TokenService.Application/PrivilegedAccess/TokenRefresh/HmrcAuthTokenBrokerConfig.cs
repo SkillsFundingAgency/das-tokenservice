@@ -1,14 +1,11 @@
-﻿using System;
+﻿namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 
-namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh
+public class HmrcAuthTokenBrokerConfig : IHmrcAuthTokenBrokerConfig
 {
-    public class HmrcAuthTokenBrokerConfig : IHmrcAuthTokenBrokerConfig
+    public HmrcAuthTokenBrokerConfig()
     {
-        public HmrcAuthTokenBrokerConfig()
-        {
-            RetryDelay = TimeSpan.FromSeconds(30);    
-        }
-
-        public TimeSpan RetryDelay { get; set; }
+        RetryDelay = TimeSpan.FromSeconds(30);    
     }
+
+    public TimeSpan RetryDelay { get; set; }
 }

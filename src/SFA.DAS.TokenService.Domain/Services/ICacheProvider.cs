@@ -1,11 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿namespace SFA.DAS.TokenService.Domain.Services;
 
-namespace SFA.DAS.TokenService.Domain.Services
+public interface ICacheProvider
 {
-    public interface ICacheProvider
-    {
-        Task<object> GetAsync(string key);
-        Task SetAsync(string key, object value, DateTimeOffset? expiryTime = null);
-    }
+    Task<object> GetAsync(string key);
+    Task SetAsync(string key, object value, DateTimeOffset? expiryTime = null);
 }
