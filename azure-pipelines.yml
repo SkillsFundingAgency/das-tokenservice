@@ -97,19 +97,19 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DIG-PreProd-ARM
 
-# - stage: Deploy_PROD
-#   dependsOn: Build
-#   displayName: Deploy to PROD
-#   variables:
-#   - group: Prod Management Resources
-#   - group: Prod Shared Resources
-#   - group: PROD das-tokenservice
-#   jobs:
-#   - template: pipeline-templates/job/deploy.yml
-#     parameters:
-#       Environment: PROD
-#       SolutionBaseName: $(SolutionBaseName)
-#       ServiceConnection: SFA-DIG-Prod-ARM
+- stage: Deploy_PROD
+  dependsOn: Build
+  displayName: Deploy to PROD
+  variables:
+  - group: Prod Management Resources
+  - group: Prod Shared Resources
+  - group: PROD das-tokenservice
+  jobs:
+  - template: pipeline-templates/job/deploy.yml
+    parameters:
+      Environment: PROD
+      SolutionBaseName: $(SolutionBaseName)
+      ServiceConnection: SFA-DIG-Prod-ARM
 
 - stage: Deploy_MO
   dependsOn: Build
