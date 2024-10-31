@@ -35,7 +35,7 @@ namespace SFA.DAS.TokenService.Infrastructure.Services
                 Scopes = "read:apprenticeship-levy"
             };
             
-            _logger.Warn($"GetAccessToken request: {JsonConvert.SerializeObject(request)}");
+            _logger.Warn($"GetAccessToken request: {JsonConvert.SerializeObject(request)}. Client Url: {_configuration.Url}");
             
             var hmrcToken = await _httpClient.Post<OAuthTokenResponse>(_configuration.Url, request);
             
