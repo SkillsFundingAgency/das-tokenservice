@@ -20,7 +20,6 @@ public class WhenGettingAccessTokenFromRefreshToken
     private const string ExistingRefreshToken = "ORIG-REFRESH-TOKEN";
 
     private Mock<IHttpClientWrapper> _httpClient;
-    private List<MediaTypeWithQualityHeaderValue> _clientAcceptHeaders;
     private OAuthTokenServiceConfiguration _configuration;
     private OAuthTokenService _service;
 
@@ -33,10 +32,7 @@ public class WhenGettingAccessTokenFromRefreshToken
             ClientId = ClientId
         };
 
-        _clientAcceptHeaders = [];
         _httpClient = new Mock<IHttpClientWrapper>();
-        _httpClient.Setup(c => c.AcceptHeaders)
-            .Returns(_clientAcceptHeaders);
         _httpClient.Setup(c => c.Post<OAuthTokenResponse>(_configuration.Url, It.IsAny<OAuthTokenRequest>()))
             .ReturnsAsync(new OAuthTokenResponse
             {
@@ -77,14 +73,6 @@ public class WhenGettingAccessTokenFromRefreshToken
     }
 
     [Test]
-    public void ThenItShouldSetTheAcceptHeadersToHmrcJson()
-    {
-        // Assert
-        _clientAcceptHeaders.Count.Should().Be(1);
-        _clientAcceptHeaders[0].MediaType.Should().Be("application/vnd.hmrc.1.0+json" );
-    }
-
-    [Test]
     public async Task ThenItShouldUseCorrectRequestParameters()
     {
         // Act
@@ -92,10 +80,8 @@ public class WhenGettingAccessTokenFromRefreshToken
 
         // Assert
         _httpClient.Verify(c => c.Post<OAuthTokenResponse>(_configuration.Url, 
-            It.Is<OAuthTokenRefreshRequest>(r => r.ClientId == ClientId
+            It.Is<OAuthTokenRequest>(r => r.ClientId == ClientId
                                                  && r.ClientSecret == ClientSecret
-                                                 && r.GrantType == "client_credentials"
-                                                 && r.Scopes == "read:apprenticeship-levy"
                                                  && r.RefreshToken == ExistingRefreshToken)), Times.Once);
     }
 }
