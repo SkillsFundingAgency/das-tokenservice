@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Moq;
+using NLog;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
 using SFA.DAS.TokenService.Infrastructure.Http;
@@ -49,7 +50,7 @@ namespace SFA.DAS.TokenService.Infrastructure.UnitTests.Services.OAuthTokenServi
                     TokenType = TokenType
                 });
 
-            _service = new OAuthTokenService(_httpClient.Object, _configuration);
+            _service = new OAuthTokenService(_httpClient.Object, _configuration, Mock.Of<ILogger>());
         }
 
         [Test]
