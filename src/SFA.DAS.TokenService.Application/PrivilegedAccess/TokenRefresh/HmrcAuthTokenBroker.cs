@@ -80,7 +80,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
             _logger.LogInformation("Refreshing token (expired {ExpiresAt})", token.ExpiresAt);
 
             var privilegedAccessToken = await GetPrivilegedAccessToken();
-            var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(privilegedAccessToken, token.RefreshToken!));
+            var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken, token.RefreshToken!));
 
             _logger.LogInformation("Refresh token successful (new expiry {Expiry})", newToken?.ExpiresAt.ToString("yy-MMM-dd ddd HH:mm:ss") ?? "not available - new token is null");
 

@@ -22,7 +22,7 @@ public class OAuthTokenService(
         return await GetToken(request);
     }
 
-    public async Task<OAuthAccessToken> GetAccessTokenFromRefreshToken(string privilegedAccessToken, string refreshToken)
+    public async Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken, string refreshToken)
     {
         var clientSecret = GetClientSecret();
 

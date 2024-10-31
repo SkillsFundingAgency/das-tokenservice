@@ -50,7 +50,7 @@ public class WhenGettingAccessTokenFromRefreshToken
     public async Task ThenItShouldReturnTheAccessTokenFromTheHttpClient()
     {
         // Act
-        var actual = await _service.GetAccessTokenFromRefreshToken(ClientSecret, ExistingRefreshToken);
+        var actual = await _service.GetAccessToken(ClientSecret, ExistingRefreshToken);
 
         // Assert
         actual.Should().NotBeNull();
@@ -64,7 +64,7 @@ public class WhenGettingAccessTokenFromRefreshToken
     public async Task ThenItShouldReturnExpiresAtAsUtfNowPlusExpiresInSeconds()
     {
         // Act
-        var actual = await _service.GetAccessTokenFromRefreshToken(ClientSecret, ExistingRefreshToken);
+        var actual = await _service.GetAccessToken(ClientSecret, ExistingRefreshToken);
 
         // Assert
         var expectedExpiry = DateTime.UtcNow.AddSeconds(ExpiresIn);
@@ -76,7 +76,7 @@ public class WhenGettingAccessTokenFromRefreshToken
     public async Task ThenItShouldUseCorrectRequestParameters()
     {
         // Act
-        await _service.GetAccessTokenFromRefreshToken(ClientSecret, ExistingRefreshToken);
+        await _service.GetAccessToken(ClientSecret, ExistingRefreshToken);
 
         // Assert
         _httpClient.Verify(c => c.Post<OAuthTokenResponse>(_configuration.Url, 
