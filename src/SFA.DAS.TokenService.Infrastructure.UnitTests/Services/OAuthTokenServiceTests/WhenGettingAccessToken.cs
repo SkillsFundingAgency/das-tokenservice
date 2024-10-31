@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
