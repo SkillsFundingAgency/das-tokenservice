@@ -1,6 +1,8 @@
 ﻿using System;
-using System.Threading;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using NLog;
 using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Domain.Services;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
@@ -12,13 +14,15 @@ namespace SFA.DAS.TokenService.Infrastructure.Services
     {
         private readonly IHttpClientWrapper _httpClient;
         private readonly OAuthTokenServiceConfiguration _configuration;
+        private readonly ILogger _logger;
 
-        public OAuthTokenService(IHttpClientWrapper httpClient, OAuthTokenServiceConfiguration configuration)
+        public OAuthTokenService(IHttpClientWrapper httpClient, OAuthTokenServiceConfiguration configuration, ILogger logger)
         {
             _httpClient = httpClient;
             _configuration = configuration;
+            _logger = logger;
 
-            _httpClient.AcceptHeaders.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/vnd.hmrc.1.0+json"));
+            _httpClient.AcceptHeaders.Add(new MediaTypeWithQualityHeaderValue("application/vnd.hmrc.1.0+json"));
         }
 
         public async Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken)
@@ -30,7 +34,11 @@ namespace SFA.DAS.TokenService.Infrastructure.Services
                 GrantType = "client_credentials",
                 Scopes = "read:apprenticeship-levy"
             };
+            
+            _logger.Warn($"GetAccessToken request: {JsonConvert.SerializeObject(request)}");
+            
             var hmrcToken = await _httpClient.Post<OAuthTokenResponse>(_configuration.Url, request);
+            
             return new OAuthAccessToken
             {
                 AccessToken = hmrcToken.AccessToken,
