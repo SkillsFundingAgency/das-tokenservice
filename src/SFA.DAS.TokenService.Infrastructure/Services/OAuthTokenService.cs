@@ -45,7 +45,7 @@ public class OAuthTokenService(
 
     private async Task<OAuthAccessToken> GetToken(OAuthTokenRequest request)
     {
-        logger.LogWarning("OAuthTokenService.GetToken request: {Request}", JsonConvert.SerializeObject(request));
+        logger.LogInformation("OAuthTokenService.GetToken request: {Request}", JsonConvert.SerializeObject(request));
         
         var hmrcToken = await httpClient.Post<OAuthTokenResponse>(configuration.Url, request);
 
