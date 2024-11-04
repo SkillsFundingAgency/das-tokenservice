@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using SFA.DAS.TokenService.Domain;
+﻿using SFA.DAS.TokenService.Domain;
 using SFA.DAS.TokenService.Domain.Services;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
 using SFA.DAS.TokenService.Infrastructure.Http;
@@ -9,8 +7,7 @@ namespace SFA.DAS.TokenService.Infrastructure.Services;
 
 public class OAuthTokenService(
     IHttpClientWrapper httpClient,
-    OAuthTokenServiceConfiguration configuration,
-    ILogger<OAuthTokenService> logger)
+    OAuthTokenServiceConfiguration configuration)
     : IOAuthTokenService
 {
     public async Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken)
@@ -45,8 +42,6 @@ public class OAuthTokenService(
 
     private async Task<OAuthAccessToken> GetToken(OAuthTokenRequest request)
     {
-        logger.LogInformation("OAuthTokenService.GetToken request: {Request}", JsonConvert.SerializeObject(request));
-        
         var hmrcToken = await httpClient.Post<OAuthTokenResponse>(configuration.Url, request);
 
         return new OAuthAccessToken
