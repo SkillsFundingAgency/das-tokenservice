@@ -3,5 +3,5 @@
 public interface IOAuthTokenService
 {
     Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken);
-    Task<OAuthAccessToken> GetAccessTokenFromRefreshToken(string privilegedAccessToken, string refreshToken);
+    Task<OAuthAccessToken> GetAccessToken(string privilegedAccessToken, string refreshToken);
 }

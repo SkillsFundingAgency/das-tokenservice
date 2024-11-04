@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Headers;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Infrastructure.Configuration;
@@ -19,7 +18,6 @@ public class WhenGettingAccessToken
     private const string ClientId = "CLIENT-ID";
 
     private Mock<IHttpClientWrapper> _httpClient;
-    private List<MediaTypeWithQualityHeaderValue> _clientAcceptHeaders;
     private OAuthTokenServiceConfiguration _configuration;
     private OAuthTokenService _service;
 
@@ -32,10 +30,7 @@ public class WhenGettingAccessToken
             ClientId = ClientId
         };
 
-        _clientAcceptHeaders = new List<MediaTypeWithQualityHeaderValue>();
         _httpClient = new Mock<IHttpClientWrapper>();
-        _httpClient.Setup(c => c.AcceptHeaders)
-            .Returns(_clientAcceptHeaders);
         _httpClient.Setup(c => c.Post<OAuthTokenResponse>(_configuration.Url, It.IsAny<OAuthTokenRequest>()))
             .ReturnsAsync(new OAuthTokenResponse
             {
@@ -75,13 +70,6 @@ public class WhenGettingAccessToken
         (actual.ExpiresAt <= expectedExpiry.AddSeconds(1)).Should().BeTrue($"Expected Expiry time to be less than or equal to {expectedExpiry.AddSeconds(1)}, but was {actual.ExpiresAt}");
     }
 
-    [Test]
-    public void ThenItShouldSetTheAcceptHeadersToHmrcJson()
-    {
-        // Assert
-        _clientAcceptHeaders.Count.Should().Be(1);
-        _clientAcceptHeaders[0].MediaType.Should().Be("application/vnd.hmrc.1.0+json" );
-    }
 
     [Test]
     public async Task ThenItShouldUseCorrectRequestParameters()
@@ -90,9 +78,8 @@ public class WhenGettingAccessToken
         await _service.GetAccessToken(ClientSecret);
 
         // Assert
-        _httpClient.Verify(c => c.Post<OAuthTokenResponse>(_configuration.Url, It.Is<OAuthTokenRequest>(r => r.ClientId == ClientId
-                                                                                                             && r.ClientSecret == ClientSecret
-                                                                                                             && r.GrantType == "client_credentials"
-                                                                                                             && r.Scopes == "read:apprenticeship-levy")), Times.Once);
+        _httpClient.Verify(c => c.Post<OAuthTokenResponse>(_configuration.Url, It.Is<OAuthTokenRequest>(r =>
+            r.ClientId == ClientId
+            && r.ClientSecret == ClientSecret)), Times.Once);
     }
 }

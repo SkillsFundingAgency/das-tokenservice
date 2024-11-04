@@ -51,7 +51,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
 
     private Task<OAuthAccessToken?> InitialiseToken()
     {
-        return GetTokenFromServiceAsync()
+        return GetToken()
             .ContinueWith(task =>
             {
                 StartTokenBackgroundRefresh(task.Result);
@@ -63,24 +63,24 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
     {
         DisposeCancellationToken();
         _cancellationTokenSource = new CancellationTokenSource();
-        _tokenRefresher.StartTokenBackgroundRefreshAsync(token, RefreshTokenAsync, _cancellationTokenSource.Token);
+        _tokenRefresher.StartTokenBackgroundRefreshAsync(token, RefreshToken, _cancellationTokenSource.Token);
     }
 
-    private async Task<OAuthAccessToken?> RefreshTokenAsync(OAuthAccessToken existingToken)
+    private async Task<OAuthAccessToken?> RefreshToken(OAuthAccessToken existingToken)
     {
-        _cachedAccessToken = await GetTokenFromServiceUsingRefreshTokenAsync(existingToken) ?? await GetTokenFromServiceAsync();
+        _cachedAccessToken = await GetTokenUsingRefreshToken(existingToken) ?? await GetToken();
 
         return _cachedAccessToken;
     }
 
-    private async Task<OAuthAccessToken?> GetTokenFromServiceUsingRefreshTokenAsync(OAuthAccessToken token)
+    private async Task<OAuthAccessToken?> GetTokenUsingRefreshToken(OAuthAccessToken token)
     {
         try
         {
             _logger.LogInformation("Refreshing token (expired {ExpiresAt})", token.ExpiresAt);
 
-            var privilegedAccessToken = await GetPrivilegedAccessToken();
-            var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessTokenFromRefreshToken(privilegedAccessToken, token.RefreshToken!));
+            var privilegedAccessToken = await GeneratePrivilegedAccessToken();
+            var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken, token.RefreshToken!));
 
             _logger.LogInformation("Refresh token successful (new expiry {Expiry})", newToken?.ExpiresAt.ToString("yy-MMM-dd ddd HH:mm:ss") ?? "not available - new token is null");
 
@@ -93,21 +93,21 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
         }
     }
 
-    private async Task<OAuthAccessToken?> GetTokenFromServiceAsync()
+    private async Task<OAuthAccessToken?> GetToken()
     {
         var attempts = 0;
 
-        OAuthAccessToken? tempToken = null;
+        OAuthAccessToken? refreshedToken = null;
 
-        while (tempToken == null)
+        while (refreshedToken == null)
         {
             _logger.LogInformation("Initial call to get a token: attempt {Attempts}", ++attempts);
 
-            var privilegedAccessToken = await GetPrivilegedAccessToken();
+            var privilegedAccessToken = await GeneratePrivilegedAccessToken();
             
-            tempToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken));
+            refreshedToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken));
 
-            if (tempToken != null)
+            if (refreshedToken != null)
             {
                 continue;
             }
@@ -117,19 +117,19 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
             await Task.Delay(_hmrcAuthTokenBrokerConfig.RetryDelay);
         }
 
-        _cachedAccessToken = tempToken;
+        _cachedAccessToken = refreshedToken;
 
         return _cachedAccessToken;
     }
 
-    private async Task<string> GetPrivilegedAccessToken()
+    private async Task<string> GeneratePrivilegedAccessToken()
     {
-        _logger.LogInformation("Attempting to get privileged access token from service using refresh token");
+        _logger.LogInformation("Attempting to generate privileged access token.");
 
         var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
         var privilegedToken = _totpService.Generate(secret);
 
-        _logger.LogInformation("Attempt to get privileged access token completed successfully");
+        _logger.LogInformation("Privileged access token generated successfully.");
 
         return privilegedToken;
     }

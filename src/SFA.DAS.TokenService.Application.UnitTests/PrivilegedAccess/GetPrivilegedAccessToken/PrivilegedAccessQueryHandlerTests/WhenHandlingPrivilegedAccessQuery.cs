@@ -61,7 +61,7 @@ public class WhenHandlingPrivilegedAccessQuery
                 Scope = Scope,
                 TokenType = TokenType
             });
-        _oauthTokenService.Setup(s => s.GetAccessTokenFromRefreshToken(TotpCode, CachedRefreshToken))
+        _oauthTokenService.Setup(s => s.GetAccessToken(TotpCode, CachedRefreshToken))
             .ReturnsAsync(new OAuthAccessToken
             {
                 AccessToken = RefreshedAccessToken,
