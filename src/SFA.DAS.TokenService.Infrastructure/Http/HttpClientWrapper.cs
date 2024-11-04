@@ -16,7 +16,7 @@ public class HttpClientWrapper : IHttpClientWrapper
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new HttpRequestException($"Http status code {response.StatusCode} indicates failure. (Status description: {response.ReasonPhrase}, body: {responseBody})");
+            throw new HttpRequestException($"Http status code {response.StatusCode} indicates failure. (Status description: {response.ReasonPhrase}, body: {responseBody}, content: {JsonConvert.SerializeObject(content)})");
         }
 
         return JsonConvert.DeserializeObject<T>(responseBody);
