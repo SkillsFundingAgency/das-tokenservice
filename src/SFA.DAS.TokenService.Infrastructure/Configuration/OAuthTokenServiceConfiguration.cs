@@ -2,7 +2,7 @@
 
 public record OAuthTokenServiceConfiguration
 {
-    public string? Url { get; set; }
-    public string? ClientId { get; set; }
-    public string? ClientSecret { get; set; }
+    public string Url { get; set; } = string.Empty;
+    public string ClientId { get; set; } = string.Empty;
+    public string ClientSecret { get; set; } = string.Empty;
 }

@@ -12,7 +12,7 @@ public class WhenCreatingATokenRequest
         var clientId = Guid.NewGuid().ToString();
         var clientSecret = Guid.NewGuid().ToString();
 
-        var request = OAuthTokenRequest.Create(clientId, clientSecret);
+        var request = new OAuthTokenRequest(clientId, clientSecret);
 
         request.ClientId.Should().Be(clientId);
         request.ClientSecret.Should().Be(clientSecret);
@@ -28,7 +28,7 @@ public class WhenCreatingATokenRequest
         var clientSecret = Guid.NewGuid().ToString();
         var refreshToken = Guid.NewGuid().ToString();
 
-        var request = OAuthTokenRequest.Create(clientId, clientSecret, refreshToken);
+        var request = new OAuthTokenRequest(clientId, clientSecret, refreshToken);
 
         request.ClientId.Should().Be(clientId);
         request.ClientSecret.Should().Be(clientSecret);
