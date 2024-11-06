@@ -24,7 +24,8 @@ public static class AuthenticationServiceRegistrations
             auth.Authority = $"https://login.microsoftonline.com/{activeDirectorySettings?.Tenant}";
             auth.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
             {
-                ValidAudiences = activeDirectorySettings?.Identifier.Split(','),
+                ValidAudiences = configuration["idaAudience"].Split(','),
+                RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
             };
         });
     }
