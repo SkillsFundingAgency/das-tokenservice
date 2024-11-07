@@ -4,9 +4,9 @@ public abstract class OtpGenerator(OtpGeneratorSettings settings)
 {
     protected string Generate(byte[] msg)
     {
-        var hashKey = ConvertSecretToHashKey(settings.SharedSecret);
+        var key = ConvertSecretToHashKey(settings.SharedSecret!);
 
-        var hash = ComputeHash(hashKey, msg);
+        var hash = ComputeHash(key, msg);
 
         // put selected bytes into result int
         var offset = hash[hash.Length - 1] & 0xf;
@@ -18,10 +18,16 @@ public abstract class OtpGenerator(OtpGeneratorSettings settings)
             (hash[offset + 3] & 0xff);
 
         var otp = binary % (int)Math.Pow(10, settings.CodeLength);
+
+        var result = otp.ToString();
         
-        return otp.ToString().PadLeft(settings.CodeLength, '0');
+        while (result.Length < settings.CodeLength)
+        {
+            result = "0" + result;
+        }
+        return result;
     }
 
-    protected abstract byte[] ConvertSecretToHashKey(OtpSharedSecret? sharedSecret);
+    protected abstract byte[] ConvertSecretToHashKey(OtpSharedSecret sharedSecret);
     protected abstract byte[] ComputeHash(byte[] k, byte[] msg);
 }
