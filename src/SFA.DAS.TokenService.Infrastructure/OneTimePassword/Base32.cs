@@ -1,26 +1,25 @@
 namespace SFA.DAS.TokenService.Infrastructure.OneTimePassword;
 
-internal static class Base32
+internal sealed class Base32
 {
     public static byte[] ToBytes(string input)
     {
         if (string.IsNullOrEmpty(input))
         {
-            throw new ArgumentNullException(nameof(input));
+            throw new ArgumentNullException("input");
         }
 
         input = input.TrimEnd('='); //remove padding characters
-        var byteCount = input.Length * 5 / 8; //this must be TRUNCATED
-        var returnArray = new byte[byteCount];
+        int byteCount = input.Length * 5 / 8; //this must be TRUNCATED
+        byte[] returnArray = new byte[byteCount];
 
         byte curByte = 0, bitsRemaining = 8;
-        var arrayIndex = 0;
+        int mask = 0, arrayIndex = 0;
 
-        foreach (var c in input)
+        foreach (char c in input)
         {
-            var cValue = CharToValue(c);
+            int cValue = CharToValue(c);
 
-            var mask = 0;
             if (bitsRemaining > 5)
             {
                 mask = cValue << (bitsRemaining - 5);
@@ -46,9 +45,48 @@ internal static class Base32
         return returnArray;
     }
 
+    public static string ToString(byte[] input)
+    {
+        if (input == null || input.Length == 0)
+        {
+            throw new ArgumentNullException("input");
+        }
+
+        int charCount = (int)Math.Ceiling(input.Length / 5d * 8);
+        char[] returnArray = new char[charCount];
+
+        byte nextChar = 0, bitsRemaining = 5;
+        int arrayIndex = 0;
+
+        foreach (byte b in input)
+        {
+            nextChar = (byte)(nextChar | (b >> (8 - bitsRemaining)));
+            returnArray[arrayIndex++] = ValueToChar(nextChar);
+
+            if (bitsRemaining < 4)
+            {
+                nextChar = (byte)((b >> (3 - bitsRemaining)) & 31);
+                returnArray[arrayIndex++] = ValueToChar(nextChar);
+                bitsRemaining += 5;
+            }
+
+            bitsRemaining -= 3;
+            nextChar = (byte)((b << bitsRemaining) & 31);
+        }
+
+        //if we didn't end with a full char
+        if (arrayIndex != charCount)
+        {
+            returnArray[arrayIndex++] = ValueToChar(nextChar);
+            while (arrayIndex != charCount) returnArray[arrayIndex++] = '='; //padding
+        }
+
+        return new string(returnArray);
+    }
+
     private static int CharToValue(char c)
     {
-        var value = (int)c;
+        int value = (int)c;
 
         //65-90 == uppercase letters
         if (value < 91 && value > 64)
@@ -68,6 +106,21 @@ internal static class Base32
             return value - 97;
         }
 
-        throw new ArgumentException("Character is not a Base32 character.", nameof(c));
+        throw new ArgumentException("Character is not a Base32 character.", "c");
+    }
+
+    private static char ValueToChar(byte b)
+    {
+        if (b < 26)
+        {
+            return (char)(b + 65);
+        }
+
+        if (b < 32)
+        {
+            return (char)(b + 24);
+        }
+
+        throw new ArgumentException("Byte is not a value Base32 value.", "b");
     }
 }
