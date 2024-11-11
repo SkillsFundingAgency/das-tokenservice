@@ -68,7 +68,12 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
 
     private async Task<OAuthAccessToken?> RefreshToken(OAuthAccessToken existingToken)
     {
-        _cachedAccessToken = await GetTokenUsingRefreshToken(existingToken) ?? await GetToken();
+        var tempToken = await GetTokenUsingRefreshToken(existingToken) ?? await GetToken();
+       
+        if (tempToken != null)
+        {
+            _cachedAccessToken = tempToken;
+        } 
 
         return _cachedAccessToken;
     }
