@@ -19,6 +19,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
     private readonly IHmrcAuthTokenBrokerConfig _config;
 
     private OAuthAccessToken? _cachedAccessToken;
+    private Task<OAuthAccessToken?>? _initializationTask;
     private CancellationTokenSource? _cancellationTokenSource;
 
     public HmrcAuthTokenBroker(
@@ -37,19 +38,13 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
         _totpService = totpService;
         _tokenRefresher = tokenRefresher;
         _config = config;
-
-        _ = InitializeTokenAsync();
     }
 
     public async Task<OAuthAccessToken?> GetTokenAsync()
     {
-        if (_cachedAccessToken == null)
-        {
-            _logger.LogDebug("Token not initialized; initializing...");
-            _cachedAccessToken = await InitializeTokenAsync();
-        }
-
-        return _cachedAccessToken;
+        // Ensure only one initialization task is created and awaited.
+        _initializationTask ??= InitializeTokenAsync();
+        return await _initializationTask;
     }
 
     private async Task<OAuthAccessToken?> InitializeTokenAsync()
@@ -71,8 +66,8 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
 
         _cancellationTokenSource = new CancellationTokenSource();
         _ = _tokenRefresher.StartTokenBackgroundRefreshAsync(
-            token, 
-            RefreshTokenAsync, 
+            token,
+            RefreshTokenAsync,
             _cancellationTokenSource.Token
         );
     }
@@ -83,7 +78,7 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
         {
             _logger.LogInformation("Refreshing token (expired at {ExpiresAt})", existingToken.ExpiresAt);
 
-            var refreshedToken = await GetTokenUsingRefreshTokenAsync(existingToken) 
+            var refreshedToken = await GetTokenUsingRefreshTokenAsync(existingToken)
                                 ?? await RetrieveTokenAsync();
 
             _cachedAccessToken = refreshedToken;
