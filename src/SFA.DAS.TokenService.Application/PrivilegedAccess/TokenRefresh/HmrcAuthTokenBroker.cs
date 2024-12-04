@@ -16,122 +16,140 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
     private readonly ISecretRepository _secretRepository;
     private readonly ITotpService _totpService;
     private readonly ITokenRefresher _tokenRefresher;
-    private readonly IHmrcAuthTokenBrokerConfig _hmrcAuthTokenBrokerConfig;
+    private readonly IHmrcAuthTokenBrokerConfig _config;
 
-    private readonly Task<OAuthAccessToken?> _initialiseTask;
     private OAuthAccessToken? _cachedAccessToken;
-
     private CancellationTokenSource? _cancellationTokenSource;
 
     public HmrcAuthTokenBroker(
-        [RequiredPolicy(HmrcExecutionPolicy.Name)]
-        ExecutionPolicy executionPolicy,
+        [RequiredPolicy(HmrcExecutionPolicy.Name)] ExecutionPolicy executionPolicy,
         ILogger<HmrcAuthTokenBroker> logger,
         IOAuthTokenService tokenService,
         ISecretRepository secretRepository,
         ITotpService totpService,
         ITokenRefresher tokenRefresher,
-        IHmrcAuthTokenBrokerConfig hmrcAuthTokenBrokerConfig)
+        IHmrcAuthTokenBrokerConfig config)
     {
+        _executionPolicy = executionPolicy;
+        _logger = logger;
+        _tokenService = tokenService;
         _secretRepository = secretRepository;
         _totpService = totpService;
-        _tokenService = tokenService;
-        _logger = logger;
-        _executionPolicy = executionPolicy;
         _tokenRefresher = tokenRefresher;
-        _hmrcAuthTokenBrokerConfig = hmrcAuthTokenBrokerConfig;
-        _initialiseTask = InitialiseToken();
+        _config = config;
+
+        _ = InitializeTokenAsync();
     }
 
     public async Task<OAuthAccessToken?> GetTokenAsync()
     {
-        await _initialiseTask;
+        if (_cachedAccessToken == null)
+        {
+            _logger.LogDebug("Token not initialized; initializing...");
+            _cachedAccessToken = await InitializeTokenAsync();
+        }
+
         return _cachedAccessToken;
     }
 
-    private Task<OAuthAccessToken?> InitialiseToken()
+    private async Task<OAuthAccessToken?> InitializeTokenAsync()
     {
-        return GetToken()
-            .ContinueWith(task =>
-            {
-                StartTokenBackgroundRefresh(task.Result);
-                return task.Result;
-            });
+        var token = await RetrieveTokenAsync();
+        StartTokenBackgroundRefresh(token);
+        return token;
     }
 
     private void StartTokenBackgroundRefresh(OAuthAccessToken? token)
     {
         DisposeCancellationToken();
+
+        if (token == null)
+        {
+            _logger.LogWarning("Cannot start background refresh; token is null.");
+            return;
+        }
+
         _cancellationTokenSource = new CancellationTokenSource();
-        _tokenRefresher.StartTokenBackgroundRefreshAsync(token, RefreshToken, _cancellationTokenSource.Token);
+        _ = _tokenRefresher.StartTokenBackgroundRefreshAsync(
+            token, 
+            RefreshTokenAsync, 
+            _cancellationTokenSource.Token
+        );
     }
 
-    private async Task<OAuthAccessToken?> RefreshToken(OAuthAccessToken existingToken)
-    {
-        _cachedAccessToken = await GetTokenUsingRefreshToken(existingToken) ?? await GetToken();
-
-        return _cachedAccessToken;
-    }
-
-    private async Task<OAuthAccessToken?> GetTokenUsingRefreshToken(OAuthAccessToken token)
+    private async Task<OAuthAccessToken?> RefreshTokenAsync(OAuthAccessToken existingToken)
     {
         try
         {
-            _logger.LogInformation("Refreshing token (expired {ExpiresAt})", token.ExpiresAt);
+            _logger.LogInformation("Refreshing token (expired at {ExpiresAt})", existingToken.ExpiresAt);
 
-            var privilegedAccessToken = await GeneratePrivilegedAccessToken();
-            var newToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken, token.RefreshToken!));
+            var refreshedToken = await GetTokenUsingRefreshTokenAsync(existingToken) 
+                                ?? await RetrieveTokenAsync();
 
-            _logger.LogInformation("Refresh token successful (new expiry {Expiry})", newToken?.ExpiresAt.ToString("yy-MMM-dd ddd HH:mm:ss") ?? "not available - new token is null");
+            _cachedAccessToken = refreshedToken;
 
-            return newToken;
+            _logger.LogInformation("Token refresh completed (new expiry {Expiry})", refreshedToken?.ExpiresAt);
+            return refreshedToken;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error trying to refresh access token.");
+            _logger.LogError(ex, "Error occurred while refreshing token.");
             return null;
         }
     }
 
-    private async Task<OAuthAccessToken?> GetToken()
+    private async Task<OAuthAccessToken?> GetTokenUsingRefreshTokenAsync(OAuthAccessToken token)
     {
-        var attempts = 0;
-
-        OAuthAccessToken? refreshedToken = null;
-
-        while (refreshedToken == null)
+        try
         {
-            _logger.LogInformation("Initial call to get a token: attempt {Attempts}", ++attempts);
-
-            var privilegedAccessToken = await GeneratePrivilegedAccessToken();
-            
-            refreshedToken = await _executionPolicy.ExecuteAsync(async () => await _tokenService.GetAccessToken(privilegedAccessToken));
-
-            if (refreshedToken != null)
-            {
-                continue;
-            }
-
-            _logger.LogWarning("The attempt to get a token from HMRC failed - sleeping {RetryDelay} and trying again", _hmrcAuthTokenBrokerConfig.RetryDelay);
-            
-            await Task.Delay(_hmrcAuthTokenBrokerConfig.RetryDelay);
+            var privilegedAccessToken = await GeneratePrivilegedAccessTokenAsync();
+            return await _executionPolicy.ExecuteAsync(() =>
+                _tokenService.GetAccessToken(privilegedAccessToken, token.RefreshToken!));
         }
-
-        _cachedAccessToken = refreshedToken;
-
-        return _cachedAccessToken;
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to refresh token using refresh token.");
+            return null;
+        }
     }
 
-    private async Task<string> GeneratePrivilegedAccessToken()
+    private async Task<OAuthAccessToken?> RetrieveTokenAsync()
     {
-        _logger.LogInformation("Attempting to generate privileged access token.");
+        while (true)
+        {
+            try
+            {
+                _logger.LogDebug("Requesting new token...");
+
+                var privilegedAccessToken = await GeneratePrivilegedAccessTokenAsync();
+                var token = await _executionPolicy.ExecuteAsync(() =>
+                    _tokenService.GetAccessToken(privilegedAccessToken));
+
+                if (token != null)
+                {
+                    _logger.LogInformation("Token successfully retrieved.");
+                    return token;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to retrieve token; retrying...");
+            }
+
+            _logger.LogWarning("Retrying after {RetryDelay}ms...", _config.RetryDelay);
+            await Task.Delay(_config.RetryDelay);
+        }
+    }
+
+    private async Task<string> GeneratePrivilegedAccessTokenAsync()
+    {
+        _logger.LogDebug("Generating privileged access token...");
 
         var secret = await _secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
-        var privilegedToken = _totpService.Generate(secret);
+        var token = _totpService.Generate(secret);
 
-        _logger.LogInformation("Privileged access token generated successfully.");
-
-        return privilegedToken;
+        _logger.LogDebug("Privileged access token generated.");
+        return token;
     }
 
     public void Dispose()
@@ -141,8 +159,11 @@ public sealed class HmrcAuthTokenBroker : IHmrcAuthTokenBroker, IDisposable
 
     private void DisposeCancellationToken()
     {
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
+        if (_cancellationTokenSource != null)
+        {
+            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource.Dispose();
+            _cancellationTokenSource = null;
+        }
     }
 }
