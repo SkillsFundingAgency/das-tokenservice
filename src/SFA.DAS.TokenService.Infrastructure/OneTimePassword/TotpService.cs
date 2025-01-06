@@ -1,4 +1,6 @@
 ﻿using SFA.DAS.TokenService.Domain.Services;
+using Simonbu11.Otp;
+using Simonbu11.Otp.Totp;
 
 namespace SFA.DAS.TokenService.Infrastructure.OneTimePassword;
 

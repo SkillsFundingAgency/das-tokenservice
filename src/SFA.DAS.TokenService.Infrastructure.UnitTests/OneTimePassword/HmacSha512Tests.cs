@@ -1,6 +1,8 @@
 using FluentAssertions;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Infrastructure.OneTimePassword;
+using Simonbu11.Otp;
+using Simonbu11.Otp.Totp;
 
 namespace SFA.DAS.TokenService.Infrastructure.UnitTests.OneTimePassword;
 
