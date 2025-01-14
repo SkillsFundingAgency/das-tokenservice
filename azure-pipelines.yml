@@ -50,6 +50,7 @@ stages:
   variables:
   - group: DevTest Management Resources
   - group: AT DevTest Shared Resources
+  - group: AT das-tokenservice
   jobs:
   - template: pipeline-templates/job/deploy.yml
     parameters:
@@ -63,6 +64,7 @@ stages:
   variables:
   - group: DevTest Management Resources
   - group: TEST DevTest Shared Resources
+  - group: TEST das-tokenservice
   jobs:
   - template: pipeline-templates/job/deploy.yml
     parameters:
