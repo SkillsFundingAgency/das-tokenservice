@@ -18,6 +18,7 @@ public sealed class HmrcAuthTokenBroker(
 {
     private const string PrivilegedAccessSecretName = "PrivilegedAccessSecret";
 
+    private string _correlationId;
     private OAuthAccessToken _cachedAccessToken = null!;
     private CancellationTokenSource? _cancellationTokenSource;
 
@@ -25,6 +26,7 @@ public sealed class HmrcAuthTokenBroker(
     {
         if (_cachedAccessToken != null && _cachedAccessToken.ExpiresAt > DateTime.UtcNow) return _cachedAccessToken;
 
+        _correlationId = Guid.NewGuid().ToString("N");
         _cachedAccessToken = await GetTokenFromServiceAsync();
         StartTokenBackgroundRefresh(_cachedAccessToken);
         return _cachedAccessToken;
@@ -34,7 +36,7 @@ public sealed class HmrcAuthTokenBroker(
     {
         await DisposeCancellationTokenAsync();
         _cancellationTokenSource = new CancellationTokenSource();
-        _ = tokenRefresher.StartTokenBackgroundRefreshAsync(token, RefreshTokenAsync, _cancellationTokenSource.Token);
+        _ = tokenRefresher.StartTokenBackgroundRefreshAsync(token, RefreshTokenAsync, _cancellationTokenSource.Token, _correlationId);
     }
 
     private async Task<OAuthAccessToken> RefreshTokenAsync(OAuthAccessToken existingToken)
@@ -53,11 +55,11 @@ public sealed class HmrcAuthTokenBroker(
     {
         try
         {
-            logger.LogDebug("Refreshing token (expired {ExpiresAt})", token.ExpiresAt);
+            logger.LogDebug("Refreshing token {CorrelationId} (expires {ExpiresAt})", _correlationId, token.ExpiresAt);
             var privilegedAccessToken = await GetPrivilegedAccessTokenAsync();
             var newToken = await executionPolicy.ExecuteAsync(() =>
                 tokenService.GetAccessToken(privilegedAccessToken, token.RefreshToken));
-            logger.LogDebug("Refresh token successful (new expiry {NewExpiry})", newToken?.ExpiresAt);
+            logger.LogDebug("Refresh token successful {CorrelationId} (new expiry {NewExpiry})", _correlationId, newToken?.ExpiresAt);
             return newToken;
         }
         catch (Exception ex)
@@ -93,7 +95,7 @@ public sealed class HmrcAuthTokenBroker(
     private async Task<string> GetPrivilegedAccessTokenAsync()
     {
         logger.LogDebug("Retrieving privileged access token");
-        var secret = "secret"; // await secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
+        var secret = await secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
         var privilegedToken = totpService.Generate(secret);
         logger.LogDebug("Privileged access token retrieved successfully");
         return privilegedToken;

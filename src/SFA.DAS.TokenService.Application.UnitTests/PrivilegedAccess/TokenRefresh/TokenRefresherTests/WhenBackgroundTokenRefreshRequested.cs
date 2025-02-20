@@ -1,4 +1,6 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
 using NUnit.Framework;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 using SFA.DAS.TokenService.Domain;
@@ -45,7 +47,7 @@ public class WhenBackgroundTokenRefreshRequested
         // Arrange
         var audit = new TokenRefreshAudit(true);
 
-        var refresher = new TokenRefresher(audit, new TokenRefresherParameters { TokenRefreshExpirationPercentage = refreshExpirationPercentage });
+        var refresher = new TokenRefresher(audit, new TokenRefresherParameters { TokenRefreshExpirationPercentage = refreshExpirationPercentage }, Mock.Of<ILogger<TokenRefresher>>());
 
         var cancellationSource = new CancellationTokenSource(runDurationMsecs);
         var token = AccessTokenBuilder.Create().WithValidState().ExpiresInMSecs(tokenLifetimeMsecs);
@@ -56,7 +58,8 @@ public class WhenBackgroundTokenRefreshRequested
             {
                 var newToken = AccessTokenBuilder.Create().WithValidState().ExpiresInMSecs(tokenLifetimeMsecs);
                 return Task.FromResult(newToken)!;
-            }, cancellationSource.Token);
+            }, cancellationSource.Token,
+            string.Empty);
 
         try
         {

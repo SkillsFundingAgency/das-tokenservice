@@ -25,10 +25,15 @@ public interface ITokenRefresher
     ///     A cancellation token provided by the caller. This should be cancelled when the caller is closing 
     ///     down.
     /// </param>
+    /// <param name="correlationId">
+    ///     A correlationId provided by the caller.
+    ///     down.
+    /// </param>
     /// <returns>
     ///     The background task. This should probably not be awaited as it will run for a long time.
     /// </returns>
     Task StartTokenBackgroundRefreshAsync(OAuthAccessToken? token,
         Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        string correlationId);
 }
