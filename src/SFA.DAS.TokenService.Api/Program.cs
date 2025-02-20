@@ -12,8 +12,12 @@ builder.Services.AddConfigurationOptions(rootConfiguration);
 
 builder.Services.AddLogging(loggingBuilder =>
 {
+    loggingBuilder.AddApplicationInsights();
     loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>(string.Empty, LogLevel.Information);
     loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
+    
+    loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>(
+        "Microsoft.AspNetCore.Mvc.Infrastructure", LogLevel.Warning);
 });
 
 builder.Services.AddActiveDirectoryAuthentication(rootConfiguration);
