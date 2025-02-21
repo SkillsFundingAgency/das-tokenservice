@@ -7,137 +7,114 @@ using SFA.DAS.TokenService.Infrastructure.ExecutionPolicies;
 namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 
 public sealed class HmrcAuthTokenBroker(
-    [RequiredPolicy(HmrcExecutionPolicy.Name)] ExecutionPolicy executionPolicy,
+    ExecutionPolicy executionPolicy,
     ILogger<HmrcAuthTokenBroker> logger,
     IOAuthTokenService tokenService,
     ISecretRepository secretRepository,
     ITotpService totpService,
     ITokenRefresher tokenRefresher,
-    IHmrcAuthTokenBrokerConfig config)
-    : IHmrcAuthTokenBroker, IDisposable
+    IHmrcAuthTokenBrokerConfig hmrcAuthTokenBrokerConfig)
+    : IHmrcAuthTokenBroker, IAsyncDisposable
 {
     private const string PrivilegedAccessSecretName = "PrivilegedAccessSecret";
 
-    private Task<OAuthAccessToken?>? _initializationTask;
+    private string _correlationId;
+    private OAuthAccessToken _cachedAccessToken = null!;
     private CancellationTokenSource? _cancellationTokenSource;
 
-    public async Task<OAuthAccessToken?> GetTokenAsync()
+    public async Task<OAuthAccessToken> GetTokenAsync()
     {
-        // Ensure only one initialization task is created and awaited.
-        _initializationTask ??= InitializeTokenAsync();
-        return await _initializationTask;
+        if (_cachedAccessToken != null && _cachedAccessToken.ExpiresAt > DateTime.UtcNow) return _cachedAccessToken;
+
+        _correlationId = Guid.NewGuid().ToString("N");
+        _cachedAccessToken = await GetTokenFromServiceAsync();
+        StartTokenBackgroundRefresh(_cachedAccessToken);
+        return _cachedAccessToken;
     }
 
-    private async Task<OAuthAccessToken?> InitializeTokenAsync()
+    private async Task StartTokenBackgroundRefresh(OAuthAccessToken token)
     {
-        var token = await RetrieveTokenAsync();
-        StartTokenBackgroundRefresh(token);
-        return token;
-    }
-
-    private void StartTokenBackgroundRefresh(OAuthAccessToken? token)
-    {
-        DisposeCancellationToken();
-
-        if (token == null)
-        {
-            logger.LogWarning("Cannot start background refresh; token is null.");
-            return;
-        }
-
+        await DisposeCancellationTokenAsync();
         _cancellationTokenSource = new CancellationTokenSource();
-        _ = tokenRefresher.StartTokenBackgroundRefreshAsync(
-            token,
-            RefreshTokenAsync,
-            _cancellationTokenSource.Token
-        );
+        _ = tokenRefresher.StartTokenBackgroundRefreshAsync(token, RefreshTokenAsync, _cancellationTokenSource.Token, _correlationId);
     }
 
-    private async Task<OAuthAccessToken?> RefreshTokenAsync(OAuthAccessToken existingToken)
+    private async Task<OAuthAccessToken> RefreshTokenAsync(OAuthAccessToken existingToken)
+    {
+        var newToken = await GetTokenFromServiceUsingRefreshTokenAsync(existingToken) ??
+                       await GetTokenFromServiceAsync();
+        if (newToken != null)
+        {
+            _cachedAccessToken = newToken;
+        }
+
+        return _cachedAccessToken;
+    }
+
+    private async Task<OAuthAccessToken?> GetTokenFromServiceUsingRefreshTokenAsync(OAuthAccessToken token)
     {
         try
         {
-            logger.LogInformation("Refreshing token (expired at {ExpiresAt})", existingToken.ExpiresAt);
-
-            var refreshedToken = await GetTokenUsingRefreshTokenAsync(existingToken)
-                                ?? await RetrieveTokenAsync();
-
-            logger.LogInformation("Token refresh completed (new expiry {Expiry})", refreshedToken?.ExpiresAt);
-            return refreshedToken;
+            logger.LogDebug("Refreshing token {CorrelationId} (expires {ExpiresAt})", _correlationId, token.ExpiresAt);
+            var privilegedAccessToken = await GetPrivilegedAccessTokenAsync();
+            var newToken = await executionPolicy.ExecuteAsync(() =>
+                tokenService.GetAccessToken(privilegedAccessToken, token.RefreshToken));
+            logger.LogDebug("Refresh token successful {CorrelationId} (new expiry {NewExpiry})", _correlationId, newToken?.ExpiresAt);
+            return newToken;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error occurred while refreshing token.");
+            logger.LogWarning(ex, "Error trying to refresh access token: {Message}", ex.Message);
             return null;
         }
     }
 
-    private async Task<OAuthAccessToken?> GetTokenUsingRefreshTokenAsync(OAuthAccessToken token)
+    private async Task<OAuthAccessToken> GetTokenFromServiceAsync()
     {
-        try
+        var attempts = 0;
+        OAuthAccessToken? tempToken = null;
+
+        while (tempToken == null)
         {
-            var privilegedAccessToken = await GeneratePrivilegedAccessTokenAsync();
-            return await executionPolicy.ExecuteAsync(() =>
-                tokenService.GetAccessToken(privilegedAccessToken, token.RefreshToken!));
+            logger.LogDebug("Attempting to get a new token: attempt {Attempts}", ++attempts);
+            var privilegedAccessToken = await GetPrivilegedAccessTokenAsync();
+            tempToken = await executionPolicy.ExecuteAsync(() =>
+                tokenService.GetAccessToken(privilegedAccessToken));
+
+            if (tempToken == null)
+            {
+                logger.LogWarning("Attempt to get a token failed - retrying in {RetryDelay} ms",
+                    hmrcAuthTokenBrokerConfig.RetryDelay);
+                await Task.Delay(hmrcAuthTokenBrokerConfig.RetryDelay);
+            }
         }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Failed to refresh token using refresh token.");
-            return null;
-        }
+
+        return tempToken;
     }
 
-    private async Task<OAuthAccessToken?> RetrieveTokenAsync()
+    private async Task<string> GetPrivilegedAccessTokenAsync()
     {
-        while (true)
-        {
-            try
-            {
-                logger.LogDebug("Requesting new token...");
-
-                var privilegedAccessToken = await GeneratePrivilegedAccessTokenAsync();
-                var token = await executionPolicy.ExecuteAsync(() =>
-                    tokenService.GetAccessToken(privilegedAccessToken));
-
-                if (token != null)
-                {
-                    logger.LogInformation("Token successfully retrieved.");
-                    return token;
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Failed to retrieve token; retrying...");
-            }
-
-            logger.LogWarning("Retrying after {RetryDelay}ms...", config.RetryDelay);
-            await Task.Delay(config.RetryDelay);
-        }
-    }
-
-    private async Task<string> GeneratePrivilegedAccessTokenAsync()
-    {
-        logger.LogDebug("Generating privileged access token...");
-
+        logger.LogDebug("Retrieving privileged access token");
         var secret = await secretRepository.GetSecretAsync(PrivilegedAccessSecretName);
-        var token = totpService.Generate(secret);
-
-        logger.LogDebug("Privileged access token generated.");
-        return token;
+        var privilegedToken = totpService.Generate(secret);
+        logger.LogDebug("Privileged access token retrieved successfully");
+        return privilegedToken;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        DisposeCancellationToken();
+        await DisposeCancellationTokenAsync();
     }
 
-    private void DisposeCancellationToken()
+    private async ValueTask DisposeCancellationTokenAsync()
     {
         if (_cancellationTokenSource != null)
         {
-            _cancellationTokenSource.Cancel();
+            await _cancellationTokenSource.CancelAsync();
             _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = null;
         }
+
+        _cancellationTokenSource = null;
+        await Task.CompletedTask;
     }
 }

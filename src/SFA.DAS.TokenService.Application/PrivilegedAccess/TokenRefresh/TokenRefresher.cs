@@ -1,92 +1,100 @@
-﻿using SFA.DAS.TokenService.Domain;
+﻿using Microsoft.Extensions.Logging;
+using SFA.DAS.TokenService.Domain;
 
 namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 
 public class TokenRefresher(
     ITokenRefreshAudit refreshAudit,
-    TokenRefresherParameters parameters)
+    TokenRefresherParameters parameters,
+    ILogger<TokenRefresher> logger)
     : ITokenRefresher
 {
-    public Task StartTokenBackgroundRefreshAsync(OAuthAccessToken? token,
-        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken,
-        CancellationToken cancellationToken)
-    {
-        return Task.Run(async () =>
+    public async Task StartTokenBackgroundRefreshAsync(
+            OAuthAccessToken? token, 
+            Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken,
+            CancellationToken cancellationToken,
+            string correlationId)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                token = await WaitAndThenRefreshAsync(token, refreshToken, cancellationToken);
+                token = await WaitAndThenRefreshAsync(token, cancellationToken, refreshToken, correlationId);
             }
-        }, cancellationToken);
-    }
+        }
 
-    private async Task<OAuthAccessToken?> WaitAndThenRefreshAsync(OAuthAccessToken? token,
-        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken,
-        CancellationToken cancellationToken)
-    {
-        var auditItem = refreshAudit.CreateAuditEntry(token);
-
-        await WaitForRefreshTimeAsync(token, auditItem, cancellationToken);
-
-        if (cancellationToken.IsCancellationRequested)
+        private async Task<OAuthAccessToken> WaitAndThenRefreshAsync(
+            OAuthAccessToken token,
+            CancellationToken cancellationToken, 
+            Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken,
+            string correlationId)
         {
+            var auditItem = refreshAudit.CreateAuditEntry(token);
+
+            await WaitForRefreshTimeAsync(token, cancellationToken, auditItem, correlationId);
+
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                refreshAudit.RefreshStarted(auditItem);
+
+                var newToken = await TryRefreshUntilCancelledOrSuccess(
+                                                        auditItem, 
+                                                        token, 
+                                                        cancellationToken, 
+                                                        refreshToken);
+
+                refreshAudit.RefreshEnded(auditItem);
+                return newToken;
+            }
+
             return null;
         }
 
-        refreshAudit.RefreshStarted(auditItem);
-
-        var newToken = await TryRefreshUntilCancelledOrSuccess(
-            auditItem,
-            token,
-            refreshToken, cancellationToken);
-
-        refreshAudit.RefreshEnded(auditItem);
-
-        return newToken;
-    }
-
-    private async Task<OAuthAccessToken?> TryRefreshUntilCancelledOrSuccess(TokenRefreshAuditEntry auditItem,
-        OAuthAccessToken? token,
-        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken,
-        CancellationToken cancellationToken)
-    {
-        OAuthAccessToken? newToken;
-
-        do
+        private async Task<OAuthAccessToken> TryRefreshUntilCancelledOrSuccess(
+            TokenRefreshAuditEntry auditItem,
+            OAuthAccessToken token,
+            CancellationToken cancellationToken,
+            Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken)
         {
-            auditItem.RefreshAttemps++;
-            newToken = await TryRefresh(token, refreshToken);
-            if (newToken == null)
+            OAuthAccessToken newToken;
+
+            do
             {
-                await Task.Delay(parameters.RetryInterval, cancellationToken);
+                auditItem.RefreshAttemps++;
+                newToken = await TryRefresh(token, refreshToken);
+                if (newToken == null)
+                {
+                    await Task.Delay(parameters.RetryInterval, cancellationToken);
+                }
+            } while (newToken == null && !cancellationToken.IsCancellationRequested);
+
+            return newToken;
+        }
+
+        private Task<OAuthAccessToken> TryRefresh(
+            OAuthAccessToken token,
+            Func<OAuthAccessToken, Task<OAuthAccessToken>> refreshToken)
+        {
+            try
+            {
+                return refreshToken(token);
             }
-        } while (newToken == null && !cancellationToken.IsCancellationRequested);
-
-        return newToken;
-    }
-
-    private static Task<OAuthAccessToken?> TryRefresh(
-        OAuthAccessToken? token,
-        Func<OAuthAccessToken, Task<OAuthAccessToken?>> refreshToken)
-    {
-        try
-        {
-            return refreshToken(token!);
+            catch (Exception)
+            {
+                // we need to keep trying
+                return Task.FromResult<OAuthAccessToken>(null);
+            }
         }
-        catch (Exception)
+
+        private Task WaitForRefreshTimeAsync(OAuthAccessToken token, CancellationToken cancellationToken, TokenRefreshAuditEntry auditItem, string correlationId)
         {
-            // we need to keep trying
-            return Task.FromResult<OAuthAccessToken?>(null);
+            var delay = DateTime.UtcNow.GetPercentageTowards(token.ExpiresAt, parameters.TokenRefreshExpirationPercentage);
+            auditItem.PlannedRefreshDelay = delay;
+
+            if (delay == TimeSpan.Zero)
+            {
+                return Task.CompletedTask;
+            }
+
+            logger.LogInformation("Waiting for token refresh: {CorreationId} {AuditEntry}", correlationId, auditItem.ToString());
+            return Task.Delay(delay, cancellationToken);
         }
     }
-
-    private readonly Task _completedTask = Task.CompletedTask;
-
-    private Task WaitForRefreshTimeAsync(OAuthAccessToken? token, TokenRefreshAuditEntry auditItem, CancellationToken cancellationToken)
-    {
-        var delay = DateTime.UtcNow.GetPercentageTowards(token!.ExpiresAt, parameters.TokenRefreshExpirationPercentage);
-        auditItem.PlannedRefreshDelay = delay;
-
-        return delay == TimeSpan.Zero ? _completedTask : Task.Delay(delay, cancellationToken);
-    }
-}

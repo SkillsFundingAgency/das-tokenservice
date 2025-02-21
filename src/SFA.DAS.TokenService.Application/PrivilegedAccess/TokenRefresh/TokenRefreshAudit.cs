@@ -2,46 +2,36 @@
 
 namespace SFA.DAS.TokenService.Application.PrivilegedAccess.TokenRefresh;
 
-public class TokenRefreshAudit : ITokenRefreshAudit
+public class TokenRefreshAudit(bool maintainList = false) : ITokenRefreshAudit
 {
-    private readonly List<TokenRefreshAuditEntry> _auditEntries = [];
+    private readonly List<TokenRefreshAuditEntry>? _auditEntries = maintainList ? [] : null;
 
-    private readonly bool _maintainList;
-
-    public TokenRefreshAudit(bool maintainList = false)
-    {
-        _maintainList = maintainList;
-        
-        if (maintainList)
-        {
-            _auditEntries = [];
-        }
-    }
-
-    public TokenRefreshAuditEntry CreateAuditEntry(OAuthAccessToken? token)
+    public TokenRefreshAuditEntry CreateAuditEntry(OAuthAccessToken token)
     {
         var result = new TokenRefreshAuditEntry
         {
-            ExpirationTime = token!.ExpiresAt
+            ExpirationTime = token.ExpiresAt
         };
 
-        if (_maintainList)
-        {
-            _auditEntries.Add(result);
-        }
-
+        _auditEntries?.Add(result);
         return result;
     }
 
     public void RefreshStarted(TokenRefreshAuditEntry auditEntry)
     {
-        auditEntry.ActualRefreshStart = DateTime.UtcNow;
+        if (auditEntry is not null)
+        {
+            auditEntry.ActualRefreshStart = DateTime.UtcNow;
+        }
     }
 
     public void RefreshEnded(TokenRefreshAuditEntry auditEntry)
     {
-        auditEntry.ActualRefreshEnd = DateTime.UtcNow;
+        if (auditEntry is not null)
+        {
+            auditEntry.ActualRefreshEnd = DateTime.UtcNow;
+        }
     }
 
-    public IEnumerable<TokenRefreshAuditEntry> AuditItems => _auditEntries;
+    public IEnumerable<TokenRefreshAuditEntry> AuditItems => _auditEntries ?? [];
 }
