@@ -32,6 +32,9 @@
                 "description": "The name of the resource group where the shared back end App Service Plan is located."
             }
         },
+        "sharedEnvResourceGroup": {
+            "type": "string"
+        },
         "backEndAccessRestrictions": {
             "type": "array",
             "metadata": {
