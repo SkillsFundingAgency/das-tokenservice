@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging.ApplicationInsights;
 using SFA.DAS.TokenService.Api.Extensions;
 using SFA.DAS.TokenService.Api.StartupExtensions;
 using SFA.DAS.TokenService.Application.PrivilegedAccess.GetPrivilegedAccessToken;
@@ -9,16 +8,6 @@ var rootConfiguration = builder.Configuration.BuildDasConfiguration();
 
 builder.Services.AddMediatR(x => x.RegisterServicesFromAssemblyContaining<PrivilegedAccessQuery>());
 builder.Services.AddConfigurationOptions(rootConfiguration);
-
-builder.Services.AddLogging(loggingBuilder =>
-{
-    loggingBuilder.AddApplicationInsights();
-    loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>(string.Empty, LogLevel.Information);
-    loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Information);
-    
-    loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>(
-        "Microsoft.AspNetCore.Mvc.Infrastructure", LogLevel.Warning);
-});
 
 builder.Services.AddActiveDirectoryAuthentication(rootConfiguration);
 builder.Services.AddApplicationServices();
